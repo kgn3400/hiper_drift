@@ -21,7 +21,7 @@ from .const import (
 )
 from .hiper_api import HiperApi
 
-PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR]
+PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR, Platform.SENSOR]
 
 
 # ------------------------------------------------------------------

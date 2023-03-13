@@ -1,7 +1,9 @@
-"""Support for Hiper dK."""
+"""Support for Hiper."""
 from __future__ import annotations
 
-from homeassistant.components.binary_sensor import BinarySensorEntity
+from homeassistant.components.sensor import (  # SensorDeviceClass,; SensorEntityDescription,
+    SensorEntity,
+)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -24,15 +26,15 @@ async def async_setup_entry(
 
     sensors = []
 
-    sensors.append(HiperBinarySensor(coordinator, entry, hiper_api))
+    sensors.append(HiperMsgSensor(coordinator, entry, hiper_api))
 
     async_add_entities(sensors)
 
 
 # ------------------------------------------------------
 # ------------------------------------------------------
-class HiperBinarySensor(HiperDriftEntity, BinarySensorEntity):
-    """Sensor class for Hiper"""
+class HiperMsgSensor(HiperDriftEntity, SensorEntity):
+    """Sensor class Hiper"""
 
     # ------------------------------------------------------
     def __init__(
@@ -45,9 +47,8 @@ class HiperBinarySensor(HiperDriftEntity, BinarySensorEntity):
 
         self.hiper_api = hiper_api
         self.coordinator = coordinator
-
-        self._name = "Status"
-        self._unique_id = "status"
+        self._name = "Message"
+        self._unique_id = "message"
 
     # ------------------------------------------------------
     @property
@@ -57,21 +58,17 @@ class HiperBinarySensor(HiperDriftEntity, BinarySensorEntity):
     # ------------------------------------------------------
     @property
     def icon(self) -> str:
-        return "mdi:ip-network"
+        return "mdi:message-reply-outline"
 
     # ------------------------------------------------------
     @property
-    def is_on(self) -> bool:
-        """Get the state."""
-
-        return self.hiper_api.is_on
+    def native_value(self) -> str | None:
+        return self.hiper_api.msg
 
     # ------------------------------------------------------
     @property
     def extra_state_attributes(self) -> dict:
         attr: dict = {}
-
-        attr["message"] = self.hiper_api.msg
 
         return attr
 
