@@ -1,5 +1,5 @@
 {
-  "name": "Hiper driftsstatus DK",
+  "name": "Hiper drift",
   "country": ["DK"],
   "render_readme": true,
   "homeassistant": "2023.3.0"
