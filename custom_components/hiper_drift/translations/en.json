@@ -1,0 +1,50 @@
+{
+  "config": {
+    "abort": {
+      "already_configured": "Device is already configured"
+    },
+    "error": {
+      "missing_selection": "Nothing selected",
+      "missing_city": "Missing city",
+      "missing_street": "Missing street",
+      "unknown": "Unexpected error"
+    },
+    "step": {
+      "user": {
+        "title": "Hiper operating status",
+        "data": {
+          "region": "Region",
+          "city": "City",
+          "city_check": "Check operation cases for city",
+          "street": "Street",
+          "street_check": "Check operation cases for Street",
+          "general_msg": "General operation cases"
+        }
+      }
+    }
+  },
+  "options": {
+    "abort": {
+      "already_configured": "Device is already configured"
+    },
+    "error": {
+      "missing_selection": "Nothing selected",
+      "missing_city": "Missing city",
+      "missing_street": "Missing street",
+      "unknown": "Unexpected error"
+    },
+    "step": {
+      "init": {
+        "title": "Hiper operating status",
+        "data": {
+          "region": "Region",
+          "city": "City",
+          "city_check": "Check operation cases for city",
+          "street": "Street",
+          "street_check": "Check operation cases for Street",
+          "general_msg": "General operation cases"
+        }
+      }
+    }
+  }
+}
