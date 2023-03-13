@@ -1,7 +1,7 @@
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/kgn3400/hiper_driftsstatus_dk)
-![GitHub all releases](https://img.shields.io/github/downloads/kgn3400/hiper_driftsstatus_dk/total)
-![GitHub last commit](https://img.shields.io/github/last-commit/kgn3400/hiper_driftsstatus_dk)
-![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/kgn3400/hiper_driftsstatus_dk)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/kgn3400/hiper_drift)
+![GitHub all releases](https://img.shields.io/github/downloads/kgn3400/hiper_drift/total)
+![GitHub last commit](https://img.shields.io/github/last-commit/kgn3400/hiper_drift)
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/kgn3400/hiper_drift)
 
 1. udgave
 
