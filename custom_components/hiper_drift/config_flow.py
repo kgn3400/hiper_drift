@@ -105,7 +105,6 @@ def _create_form(
             vol.Optional(
                 CONF_CITY,
                 description={"suggested_value": user_input.get(CONF_CITY, "")},
-                # default=user_input.get(CONF_CITY, ""),
             ): TextSelector(TextSelectorConfig(type=TextSelectorType.TEXT)),
             vol.Required(
                 CONF_STREET_CHECK,
@@ -114,7 +113,6 @@ def _create_form(
             vol.Optional(
                 CONF_STREET,
                 description={"suggested_value": user_input.get(CONF_STREET, "")},
-                # CONF_STREET, default=user_input.get(CONF_STREET, "")
             ): TextSelector(TextSelectorConfig(type=TextSelectorType.TEXT)),
         }
     )
@@ -122,7 +120,7 @@ def _create_form(
 
 # ------------------------------------------------------------------
 # ------------------------------------------------------------------
-class HiperDriftConfigFlow(ConfigFlow, domain=DOMAIN):
+class ConfigFlowHandler(ConfigFlow, domain=DOMAIN):
     """Handle a config flow for HiperDrift"""
 
     VERSION = 1
@@ -144,19 +142,9 @@ class HiperDriftConfigFlow(ConfigFlow, domain=DOMAIN):
                         title=DOMAIN_NAME, data=user_input, options=user_input
                     )
 
-            # except MissingSelection:
-            #     errors["base"] = "missing_selection"
-            # except MissingCity:
-            #     errors["base"] = "missing_city"
-            # except MissingStreet:
-            #     errors["base"] = "missing_street"
             except Exception:  # pylint: disable=broad-except
                 LOGGER.exception("Unexpected exception")
                 errors["base"] = "unknown"
-            # else:
-            #     return self.async_create_entry(
-            #         title=DOMAIN_NAME, data=user_input, options=user_input
-            #     )
         else:
             user_input = {}
 
@@ -204,17 +192,9 @@ class OptionsFlowHandler(OptionsFlow):
             try:
                 if await _validate_input(self.hass, user_input, errors):
                     return self.async_create_entry(title=DOMAIN_NAME, data=user_input)
-            # except MissingSelection:
-            #     errors["base"] = "missing_selection"
-            # except MissingCity:
-            #     errors["base"] = "missing_city"
-            # except MissingStreet:
-            #     errors["base"] = "missing_street"
             except Exception:  # pylint: disable=broad-except
                 LOGGER.exception("Unexpected exception")
                 errors["base"] = "unknown"
-            # else:
-            #     return self.async_create_entry(title=DOMAIN_NAME, data=user_input)
         else:
             user_input = self._options.copy()
 

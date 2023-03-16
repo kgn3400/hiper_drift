@@ -12,13 +12,14 @@ import async_timeout
 from bs4 import BeautifulSoup  # type: ignore
 
 from .const import CONF_FYN, CONF_JYL, CONF_SJ_BH
+from homeassistant.core import ServiceCall
 
 
 # ------------------------------------------------------------------
 # ------------------------------------------------------------------
 @dataclass
-class HiperApi:
-    """Hiper web interface"""
+class ComponentApi:
+    """Hiper interface"""
 
     def __init__(
         self,
@@ -43,8 +44,13 @@ class HiperApi:
         self.msg: str = ""
 
     # ------------------------------------------------------------------
+    async def update_service(self, call: ServiceCall) -> None:
+        """Hiper service interface"""
+        await self.update()
+
+    # ------------------------------------------------------------------
     async def update(self) -> None:
-        """Hiper web interface"""
+        """Hiper interface"""
 
         if self.session is None:
             self.session = ClientSession()
@@ -80,7 +86,7 @@ class HiperApi:
                 is None
             ):
                 self.is_on = True
-                msg = 'Generelle driftsager"'
+                msg = "Generelle driftsager"
 
             if (
                 self.city_check

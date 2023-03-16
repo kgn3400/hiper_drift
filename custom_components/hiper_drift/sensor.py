@@ -10,8 +10,8 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .const import DOMAIN
-from .entity import HiperDriftEntity
-from .hiper_api import HiperApi
+from .entity import ComponentEntity
+from .component_api import ComponentApi
 
 
 # ------------------------------------------------------
@@ -22,18 +22,18 @@ async def async_setup_entry(
 ) -> None:
     """Setup for Hiper"""
     coordinator = hass.data[DOMAIN][entry.entry_id]["coordinator"]
-    hiper_api: HiperApi = hass.data[DOMAIN][entry.entry_id]["hiper_api"]
+    component_api: ComponentApi = hass.data[DOMAIN][entry.entry_id]["component_api"]
 
     sensors = []
 
-    sensors.append(HiperMsgSensor(coordinator, entry, hiper_api))
+    sensors.append(HiperMsgSensor(coordinator, entry, component_api))
 
     async_add_entities(sensors)
 
 
 # ------------------------------------------------------
 # ------------------------------------------------------
-class HiperMsgSensor(HiperDriftEntity, SensorEntity):
+class HiperMsgSensor(ComponentEntity, SensorEntity):
     """Sensor class Hiper"""
 
     # ------------------------------------------------------
@@ -41,11 +41,11 @@ class HiperMsgSensor(HiperDriftEntity, SensorEntity):
         self,
         coordinator: DataUpdateCoordinator,
         entry: ConfigEntry,
-        hiper_api: HiperApi,
+        component_api: ComponentApi,
     ) -> None:
         super().__init__(coordinator, entry)
 
-        self.hiper_api = hiper_api
+        self.component_api = component_api
         self.coordinator = coordinator
         self._name = "Message"
         self._unique_id = "message"
@@ -63,7 +63,7 @@ class HiperMsgSensor(HiperDriftEntity, SensorEntity):
     # ------------------------------------------------------
     @property
     def native_value(self) -> str | None:
-        return self.hiper_api.msg
+        return self.component_api.msg
 
     # ------------------------------------------------------
     @property

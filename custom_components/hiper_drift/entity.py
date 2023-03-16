@@ -12,7 +12,7 @@ from homeassistant.helpers.update_coordinator import (
 from .const import DOMAIN, DOMAIN_NAME
 
 
-class HiperDriftEntity(CoordinatorEntity[DataUpdateCoordinator], Entity):
+class ComponentEntity(CoordinatorEntity[DataUpdateCoordinator], Entity):
     """Defines a Hiper driftsstatus entity."""
 
     _attr_has_entity_name = True
@@ -29,6 +29,6 @@ class HiperDriftEntity(CoordinatorEntity[DataUpdateCoordinator], Entity):
             identifiers={(DOMAIN, DOMAIN_NAME)},
             manufacturer="KGN",
             suggested_area="Hjem",
-            sw_version="1.0.1",
+            sw_version="1.0.3",
             name=DOMAIN_NAME,
         )

@@ -8,8 +8,8 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .const import DOMAIN
-from .entity import HiperDriftEntity
-from .hiper_api import HiperApi
+from .entity import ComponentEntity
+from .component_api import ComponentApi
 
 
 # ------------------------------------------------------
@@ -20,18 +20,18 @@ async def async_setup_entry(
 ) -> None:
     """Setup for Hiper"""
     coordinator = hass.data[DOMAIN][entry.entry_id]["coordinator"]
-    hiper_api: HiperApi = hass.data[DOMAIN][entry.entry_id]["hiper_api"]
+    component_api: ComponentApi = hass.data[DOMAIN][entry.entry_id]["component_api"]
 
     sensors = []
 
-    sensors.append(HiperBinarySensor(coordinator, entry, hiper_api))
+    sensors.append(HiperBinarySensor(coordinator, entry, component_api))
 
     async_add_entities(sensors)
 
 
 # ------------------------------------------------------
 # ------------------------------------------------------
-class HiperBinarySensor(HiperDriftEntity, BinarySensorEntity):
+class HiperBinarySensor(ComponentEntity, BinarySensorEntity):
     """Sensor class for Hiper"""
 
     # ------------------------------------------------------
@@ -39,11 +39,11 @@ class HiperBinarySensor(HiperDriftEntity, BinarySensorEntity):
         self,
         coordinator: DataUpdateCoordinator,
         entry: ConfigEntry,
-        hiper_api: HiperApi,
+        component_api: ComponentApi,
     ) -> None:
         super().__init__(coordinator, entry)
 
-        self.hiper_api = hiper_api
+        self.component_api = component_api
         self.coordinator = coordinator
 
         self._name = "Status"
@@ -64,14 +64,14 @@ class HiperBinarySensor(HiperDriftEntity, BinarySensorEntity):
     def is_on(self) -> bool:
         """Get the state."""
 
-        return self.hiper_api.is_on
+        return self.component_api.is_on
 
     # ------------------------------------------------------
     @property
     def extra_state_attributes(self) -> dict:
         attr: dict = {}
 
-        attr["message"] = self.hiper_api.msg
+        attr["message"] = self.component_api.msg
 
         return attr
 

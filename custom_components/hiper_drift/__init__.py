@@ -9,6 +9,8 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
+from .services import async_setup_services
+
 from .const import (
     CONF_CITY,
     CONF_CITY_CHECK,
@@ -19,7 +21,7 @@ from .const import (
     DOMAIN,
     LOGGER,
 )
-from .hiper_api import HiperApi
+from .component_api import ComponentApi
 
 PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR, Platform.SENSOR]
 
@@ -31,7 +33,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     hass.data.setdefault(DOMAIN, {})
 
-    hiper_api: HiperApi = HiperApi(
+    component_api: ComponentApi = ComponentApi(
         session,
         entry.options[CONF_REGION],
         entry.options[CONF_GENERAL_MSG],
@@ -46,7 +48,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         LOGGER,
         name=DOMAIN,
         update_interval=timedelta(minutes=15),
-        update_method=hiper_api.update,
+        update_method=component_api.update,
     )
 
     await coordinator.async_config_entry_first_refresh()
@@ -54,10 +56,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = {
         "coordinator": coordinator,
-        "hiper_api": hiper_api,
+        "component_api": component_api,
     }
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+
+    await async_setup_services(hass, component_api)
 
     return True
 
@@ -85,16 +89,11 @@ async def update_listener(
 ) -> None:
     """Reload on config entry update."""
 
-    hiper_api: HiperApi = hass.data[DOMAIN][config_entry.entry_id]["hiper_api"]
-
-    # hiper_api.region = config_entry.options[CONF_REGION]
-    # hiper_api.general_msg = config_entry.options[CONF_GENERAL_MSG]
-    # hiper_api.city_check = config_entry.options[CONF_CITY_CHECK]
-    # hiper_api.city = config_entry.options[CONF_CITY]
-    # hiper_api.street_check = config_entry.options[CONF_STREET_CHECK]
-    # hiper_api.street = config_entry.options[CONF_STREET]
+    component_api: ComponentApi = hass.data[DOMAIN][config_entry.entry_id][
+        "component_api"
+    ]
 
     await hass.config_entries.async_reload(config_entry.entry_id)
-    await hiper_api.update()
+    await component_api.update()
 
     return
