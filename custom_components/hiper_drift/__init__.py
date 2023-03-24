@@ -9,8 +9,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
-from .services import async_setup_services
-
+from .component_api import ComponentApi
 from .const import (
     CONF_CITY,
     CONF_CITY_CHECK,
@@ -21,7 +20,7 @@ from .const import (
     DOMAIN,
     LOGGER,
 )
-from .component_api import ComponentApi
+from .services import async_setup_services
 
 PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR, Platform.SENSOR]
 
@@ -50,6 +49,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         update_interval=timedelta(minutes=15),
         update_method=component_api.update,
     )
+
+    component_api.coordinator = coordinator
 
     await coordinator.async_config_entry_first_refresh()
     entry.async_on_unload(entry.add_update_listener(update_listener))

@@ -9,10 +9,14 @@ import re
 
 from aiohttp.client import ClientSession
 import async_timeout
-from bs4 import BeautifulSoup  # type: ignore
+from bs4 import BeautifulSoup
+
+from homeassistant.core import ServiceCall
+from homeassistant.helpers.update_coordinator import (
+    DataUpdateCoordinator,  # type: ignore
+)
 
 from .const import CONF_FYN, CONF_JYL, CONF_SJ_BH
-from homeassistant.core import ServiceCall
 
 
 # ------------------------------------------------------------------
@@ -42,11 +46,13 @@ class ComponentApi:
         self.close_session: bool = False
         self.is_on: bool = False
         self.msg: str = ""
+        self.coordinator: DataUpdateCoordinator
 
     # ------------------------------------------------------------------
     async def update_service(self, call: ServiceCall) -> None:
         """Hiper service interface"""
         await self.update()
+        await self.coordinator.async_request_refresh()
 
     # ------------------------------------------------------------------
     async def update(self) -> None:
