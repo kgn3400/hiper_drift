@@ -9,7 +9,6 @@ import voluptuous as vol
 from homeassistant.config_entries import ConfigEntry, ConfigFlow, OptionsFlow
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
-from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.selector import (
     TextSelector,
@@ -121,7 +120,7 @@ def _create_form(
 # ------------------------------------------------------------------
 # ------------------------------------------------------------------
 class ConfigFlowHandler(ConfigFlow, domain=DOMAIN):
-    """Handle a config flow for HiperDrift"""
+    """Handle a config flow for HiperDrift."""
 
     VERSION = 1
 
@@ -167,7 +166,7 @@ class ConfigFlowHandler(ConfigFlow, domain=DOMAIN):
 # ------------------------------------------------------------------
 # ------------------------------------------------------------------
 class OptionsFlowHandler(OptionsFlow):
-    """Options flow for HiperDrift"""
+    """Options flow for HiperDrift."""
 
     def __init__(
         self,
@@ -203,21 +202,3 @@ class OptionsFlowHandler(OptionsFlow):
             data_schema=_create_form(user_input),
             errors=errors,
         )
-
-
-# ------------------------------------------------------------------
-# ------------------------------------------------------------------
-class MissingSelection(HomeAssistantError):
-    """Error to indicate nothing was selected."""
-
-
-# ------------------------------------------------------------------
-# ------------------------------------------------------------------
-class MissingCity(HomeAssistantError):
-    """Error to indicate nothing was selected."""
-
-
-# ------------------------------------------------------------------
-# ------------------------------------------------------------------
-class MissingStreet(HomeAssistantError):
-    """Error to indicate nothing was selected."""

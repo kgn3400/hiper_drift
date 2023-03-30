@@ -4,21 +4,20 @@
       "already_configured": "Enhed er allerede konfigureret"
     },
     "error": {
-      "missing_selection": "Intet valgt",
       "missing_city": "By skal udfyldes",
+      "missing_selection": "Intet valgt",
       "missing_street": "Gade skal udfyldes",
       "unknown": "Uventet fejl"
     },
     "step": {
       "user": {
-        "title": "Hiper driftssstatus",
         "data": {
-          "region": "Region",
-          "city": "By",
           "city_check": "Check driftssager for byen",
-          "street": "Gade",
+          "city": "By",
+          "general_msg": "Check for generelle driftssager",
+          "region": "Region",
           "street_check": "Chech driftssager for gaden",
-          "general_msg": "Check for generelle driftssager"
+          "street": "Gade"
         }
       }
     }
@@ -28,21 +27,20 @@
       "already_configured": "Enhed er allerede konfigureret"
     },
     "error": {
-      "missing_selection": "Intet valgt",
       "missing_city": "By skal udfyldes",
+      "missing_selection": "Intet valgt",
       "missing_street": "Gade skal udfyldes",
       "unknown": "Uventet fejl"
     },
     "step": {
       "init": {
-        "title": "Hiper driftssstatus",
         "data": {
-          "region": "Region",
-          "city": "By",
           "city_check": "Check driftssager for byen",
-          "street": "Gade",
+          "city": "By",
+          "general_msg": "Generelle driftssager",
+          "region": "Region",
           "street_check": "Chech driftssager for gaden",
-          "general_msg": "Generelle driftssager"
+          "street": "Gade"
         }
       }
     }

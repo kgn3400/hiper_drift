@@ -7,9 +7,9 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
+from .component_api import ComponentApi
 from .const import DOMAIN
 from .entity import ComponentEntity
-from .component_api import ComponentApi
 
 
 # ------------------------------------------------------
@@ -18,7 +18,7 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Setup for Hiper"""
+    """Entry for Hiper setup."""
     coordinator = hass.data[DOMAIN][entry.entry_id]["coordinator"]
     component_api: ComponentApi = hass.data[DOMAIN][entry.entry_id]["component_api"]
 
@@ -32,7 +32,7 @@ async def async_setup_entry(
 # ------------------------------------------------------
 # ------------------------------------------------------
 class HiperBinarySensor(ComponentEntity, BinarySensorEntity):
-    """Sensor class for Hiper"""
+    """Sensor class for Hiper."""
 
     # ------------------------------------------------------
     def __init__(
@@ -41,6 +41,13 @@ class HiperBinarySensor(ComponentEntity, BinarySensorEntity):
         entry: ConfigEntry,
         component_api: ComponentApi,
     ) -> None:
+        """Hiper binary sensor.
+
+        Args:
+            coordinator (DataUpdateCoordinator): _description_
+            entry (ConfigEntry): _description_
+            component_api (ComponentApi): _description_
+        """
         super().__init__(coordinator, entry)
 
         self.component_api = component_api
@@ -52,11 +59,21 @@ class HiperBinarySensor(ComponentEntity, BinarySensorEntity):
     # ------------------------------------------------------
     @property
     def name(self) -> str:
+        """Name.
+
+        Returns:
+            str: Name
+        """
         return self._name
 
     # ------------------------------------------------------
     @property
     def icon(self) -> str:
+        """Icon.
+
+        Returns:
+            str: Icon
+        """
         return "mdi:ip-network"
 
     # ------------------------------------------------------
@@ -69,6 +86,11 @@ class HiperBinarySensor(ComponentEntity, BinarySensorEntity):
     # ------------------------------------------------------
     @property
     def extra_state_attributes(self) -> dict:
+        """Extra state attributes.
+
+        Returns:
+            dict: Extra state attributes
+        """
         attr: dict = {}
 
         attr["message"] = self.component_api.msg
@@ -78,6 +100,11 @@ class HiperBinarySensor(ComponentEntity, BinarySensorEntity):
     # ------------------------------------------------------
     @property
     def unique_id(self) -> str:
+        """Unique id.
+
+        Returns:
+            str: Unique id
+        """
         return self._unique_id
 
     # ------------------------------------------------------
