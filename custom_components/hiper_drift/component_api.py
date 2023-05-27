@@ -12,7 +12,7 @@ from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator,  # type: ignore
 )
 
-from .const import CONF_FYN, CONF_JYL, CONF_SJ_BH
+from .const import CONF_FYN, CONF_SJ_BH  # CONF_JYL,
 
 
 # ------------------------------------------------------------------
@@ -56,39 +56,48 @@ class ComponentApi:
         self.coordinator: DataUpdateCoordinator
 
     # ------------------------------------------------------------------
-    async def update_service(self, call: ServiceCall) -> None:
+    async def async_update_service(self, call: ServiceCall) -> None:
         """Hiper service interface."""
-        await self.update()
+        await self.async_update()
         await self.coordinator.async_request_refresh()
 
     # ------------------------------------------------------------------
-    async def update(self) -> None:
+    async def async_update(self) -> None:
         """Hiper interface."""
 
         if self.session is None:
             self.session = ClientSession()
             self.close_session = True
 
-        self.msg = await self._check_hiper(self.region)
+        self.msg = await self._async_check_hiper(self.region)
 
         if self.session and self.close_session:
             await self.session.close()
 
     # ------------------------------------------------------
-    async def _check_hiper(self, region: str) -> str:
+    async def _async_check_hiper(self, region: str) -> str:
         msg: str = ""
         self.is_on = False
 
         if region == CONF_SJ_BH:
             url: str = "https://www.hiper.dk/drift/region/sjaelland-og-bornholm"
+            ingen_driftssager: str = 'Ingen driftssager på Sjælland og Bornholm'
         elif region == CONF_FYN:
             url = "https://www.hiper.dk/drift/region/fyn"
-        elif region == CONF_JYL:
+            ingen_driftssager: str = 'Ingen driftssager på Fyn'
+
+        else:  # region == CONF_JYL:
             url = "https://www.hiper.dk/drift/region/jylland"
+            ingen_driftssager: str = 'Ingen driftssager på Jylland'
 
         try:
+
             async with async_timeout.timeout(self.request_timeout):
                 response = await self.session.request("GET", url)  # type: ignore
+
+                if response.real_url.path.upper().find('/region/'.upper()) == -1:
+                    return msg
+
                 soup = BeautifulSoup(await response.text(), "html.parser")
 
             if (
@@ -124,7 +133,11 @@ class ComponentApi:
             ):
                 self.is_on = True
                 msg = (
-                    "Lok" + "ale driftssager for " + self.city.strip() + " på " + self.street
+                    "Lok"
+                    + "ale driftssager for "
+                    + self.city.strip()
+                    + " på "
+                    + self.street
                 )
 
         except asyncio.TimeoutError:
