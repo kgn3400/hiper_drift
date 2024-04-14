@@ -97,4 +97,3 @@ async def update_listener(
     await hass.config_entries.async_reload(config_entry.entry_id)
     await component_api.async_update()
 
-    return

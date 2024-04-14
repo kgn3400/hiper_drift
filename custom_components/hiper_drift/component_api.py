@@ -1,10 +1,10 @@
 """Component api for Hiper drift."""
-import asyncio
+
+from asyncio import timeout
 from dataclasses import dataclass
 import re
 
 from aiohttp.client import ClientSession
-import async_timeout
 from bs4 import BeautifulSoup
 
 from homeassistant.core import ServiceCall
@@ -41,7 +41,9 @@ class ComponentApi:
             city (str): _description_
             street_check (bool): _description_
             street (str): _description_
+
         """
+
         self.session: ClientSession | None = session
         self.region: str = region
         self.general_msg: bool = general_msg
@@ -81,21 +83,17 @@ class ComponentApi:
 
         if region == CONF_SJ_BH:
             url: str = "https://www.hiper.dk/drift/region/sjaelland-og-bornholm"
-            ingen_driftssager: str = 'Ingen driftssager på Sjælland og Bornholm'
         elif region == CONF_FYN:
             url = "https://www.hiper.dk/drift/region/fyn"
-            ingen_driftssager: str = 'Ingen driftssager på Fyn'
 
         else:  # region == CONF_JYL:
             url = "https://www.hiper.dk/drift/region/jylland"
-            ingen_driftssager: str = 'Ingen driftssager på Jylland'
 
         try:
-
-            async with async_timeout.timeout(self.request_timeout):
+            async with timeout(self.request_timeout):
                 response = await self.session.request("GET", url)  # type: ignore
 
-                if response.real_url.path.upper().find('/region/'.upper()) == -1:
+                if response.real_url.path.upper().find("/region/".upper()) == -1:
                     return msg
 
                 soup = BeautifulSoup(await response.text(), "html.parser")
@@ -132,14 +130,8 @@ class ComponentApi:
                 is not None
             ):
                 self.is_on = True
-                msg = (
-                    "Lok"
-                    + "ale driftssager for "
-                    + self.city.strip()
-                    + " på "
-                    + self.street
-                )
+                msg = f"Lokale driftssager for {self.city.strip()} på {self.street}"
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             pass
         return msg

@@ -1,4 +1,5 @@
 """Support for Hiper dK."""
+
 from __future__ import annotations
 
 from homeassistant.components.binary_sensor import BinarySensorEntity
@@ -8,7 +9,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .component_api import ComponentApi
-from .const import DOMAIN
+from .const import DOMAIN, TRANSLATION_KEY
 from .entity import ComponentEntity
 
 
@@ -47,6 +48,7 @@ class HiperBinarySensor(ComponentEntity, BinarySensorEntity):
             coordinator (DataUpdateCoordinator): _description_
             entry (ConfigEntry): _description_
             component_api (ComponentApi): _description_
+
         """
         super().__init__(coordinator, entry)
 
@@ -55,6 +57,7 @@ class HiperBinarySensor(ComponentEntity, BinarySensorEntity):
 
         self._name = "Status"
         self._unique_id = "status"
+        self.translation_key = TRANSLATION_KEY
 
     # ------------------------------------------------------
     @property
@@ -63,18 +66,20 @@ class HiperBinarySensor(ComponentEntity, BinarySensorEntity):
 
         Returns:
             str: Name
+
         """
         return self._name
 
     # ------------------------------------------------------
-    @property
-    def icon(self) -> str:
-        """Icon.
+    # @property
+    # def icon(self) -> str:
+    #     """Icon.
 
-        Returns:
-            str: Icon
-        """
-        return "mdi:ip-network"
+    #     Returns:
+    #         str: Icon
+
+    #     """
+    #     return "mdi:ip-network"
 
     # ------------------------------------------------------
     @property
@@ -90,7 +95,9 @@ class HiperBinarySensor(ComponentEntity, BinarySensorEntity):
 
         Returns:
             dict: Extra state attributes
+
         """
+
         attr: dict = {}
 
         attr["message"] = self.component_api.msg
@@ -104,6 +111,7 @@ class HiperBinarySensor(ComponentEntity, BinarySensorEntity):
 
         Returns:
             str: Unique id
+
         """
         return self._unique_id
 

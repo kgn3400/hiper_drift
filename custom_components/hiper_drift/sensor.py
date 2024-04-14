@@ -1,4 +1,5 @@
 """Support for Hiper."""
+
 from __future__ import annotations
 
 from homeassistant.components.sensor import (  # SensorDeviceClass,; SensorEntityDescription,
@@ -10,7 +11,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .component_api import ComponentApi
-from .const import DOMAIN
+from .const import DOMAIN, TRANSLATION_KEY
 from .entity import ComponentEntity
 
 
@@ -49,6 +50,7 @@ class HiperMsgSensor(ComponentEntity, SensorEntity):
             coordinator (DataUpdateCoordinator): _description_
             entry (ConfigEntry): _description_
             component_api (ComponentApi): _description_
+
         """
         super().__init__(coordinator, entry)
 
@@ -57,6 +59,8 @@ class HiperMsgSensor(ComponentEntity, SensorEntity):
         self._name = "Message"
         self._unique_id = "message"
 
+        self.translation_key = TRANSLATION_KEY
+
     # ------------------------------------------------------
     @property
     def name(self) -> str:
@@ -64,18 +68,20 @@ class HiperMsgSensor(ComponentEntity, SensorEntity):
 
         Returns:
             str: Name
+
         """
         return self._name
 
     # ------------------------------------------------------
-    @property
-    def icon(self) -> str:
-        """Icon.
+    # @property
+    # def icon(self) -> str:
+    #     """Icon.
 
-        Returns:
-            str: Icon
-        """
-        return "mdi:message-reply-outline"
+    #     Returns:
+    #         str: Icon
+
+    #     """
+    #     return "mdi:message-reply-outline"
 
     # ------------------------------------------------------
     @property
@@ -84,6 +90,7 @@ class HiperMsgSensor(ComponentEntity, SensorEntity):
 
         Returns:
             str | None: Native value
+
         """
         return self.component_api.msg
 
@@ -94,6 +101,7 @@ class HiperMsgSensor(ComponentEntity, SensorEntity):
 
         Returns:
             dict: Extra state attributes
+
         """
         attr: dict = {}
 
@@ -106,6 +114,7 @@ class HiperMsgSensor(ComponentEntity, SensorEntity):
 
         Returns:
             str: Unique id
+
         """
         return self._unique_id
 

@@ -1,0 +1,17 @@
+{
+  "entity": {
+    "sensor": {
+      "hiper_drift": {
+        "default": "mdi:message-alert"
+      }
+    },
+    "binary_sensor": {
+      "hiper_drift": {
+        "default": "mdi:ip-network"
+      }
+    }
+  },
+  "services": {
+    "update": "mdi:update"
+  }
+}
