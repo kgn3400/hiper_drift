@@ -8,11 +8,9 @@ from aiohttp.client import ClientSession
 from bs4 import BeautifulSoup
 
 from homeassistant.core import ServiceCall
-from homeassistant.helpers.update_coordinator import (
-    DataUpdateCoordinator,  # type: ignore
-)
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
-from .const import CONF_FYN, CONF_SJ_BH  # CONF_JYL,
+from .const import CONF_FYN_REGION, CONF_SJ_BH_REGION
 
 
 # ------------------------------------------------------------------
@@ -81,17 +79,17 @@ class ComponentApi:
         msg: str = ""
         self.is_on = False
 
-        if region == CONF_SJ_BH:
+        if region == CONF_SJ_BH_REGION:
             url: str = "https://www.hiper.dk/drift/region/sjaelland-og-bornholm"
-        elif region == CONF_FYN:
+        elif region == CONF_FYN_REGION:
             url = "https://www.hiper.dk/drift/region/fyn"
 
-        else:  # region == CONF_JYL:
+        else:  # region == CONF_JYL_REGION:
             url = "https://www.hiper.dk/drift/region/jylland"
 
         try:
             async with timeout(self.request_timeout):
-                response = await self.session.request("GET", url)  # type: ignore
+                response = await self.session.request("GET", url)
 
                 if response.real_url.path.upper().find("/region/".upper()) == -1:
                     return msg

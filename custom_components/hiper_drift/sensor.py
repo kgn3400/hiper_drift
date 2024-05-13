@@ -60,6 +60,7 @@ class HiperMsgSensor(ComponentEntity, SensorEntity):
         self._unique_id = "message"
 
         self.translation_key = TRANSLATION_KEY
+        # self._attr_translation_key = TRANSLATION_KEY
 
     # ------------------------------------------------------
     @property
@@ -81,6 +82,8 @@ class HiperMsgSensor(ComponentEntity, SensorEntity):
     #         str: Icon
 
     #     """
+
+    #     return None
     #     return "mdi:message-reply-outline"
 
     # ------------------------------------------------------

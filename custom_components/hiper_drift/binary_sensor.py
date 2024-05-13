@@ -35,6 +35,8 @@ async def async_setup_entry(
 class HiperBinarySensor(ComponentEntity, BinarySensorEntity):
     """Sensor class for Hiper."""
 
+    _attr_translation_key = "hiper_drift"
+
     # ------------------------------------------------------
     def __init__(
         self,
@@ -79,6 +81,7 @@ class HiperBinarySensor(ComponentEntity, BinarySensorEntity):
     #         str: Icon
 
     #     """
+    #     return None
     #     return "mdi:ip-network"
 
     # ------------------------------------------------------

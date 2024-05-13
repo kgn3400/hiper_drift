@@ -5,7 +5,6 @@
       "name": "Hiper drift"
     }
   },
-
   "config": {
     "abort": {
       "already_configured": "Device is already configured"
@@ -49,6 +48,15 @@
           "street_check": "Check operation cases for Street",
           "street": "Street"
         }
+      }
+    }
+  },
+  "selector": {
+    "region": {
+      "options": {
+        "sj_bh": "Sjælland og Bonholm",
+        "fyn": "Fyn",
+        "jylland": "Jylland"
       }
     }
   },

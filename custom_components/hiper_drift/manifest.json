@@ -1,15 +1,20 @@
 {
   "domain": "hiper_drift",
   "name": "Hiper drift",
-  "codeowners": ["@kgn3400"],
+  "codeowners": [
+    "@kgn3400"
+  ],
   "config_flow": true,
   "dependencies": [],
   "documentation": "https://github.com/kgn3400/hiper_driftsstatus_dk",
   "homekit": {},
   "iot_class": "cloud_polling",
-  "requirements": ["beautifulsoup4", "html.parser"],
+  "requirements": [
+    "beautifulsoup4",
+    "html.parser"
+  ],
   "single_config_entry": true,
   "ssdp": [],
-  "version": "1.0.8",
+  "version": "1.0.9",
   "zeroconf": []
 }

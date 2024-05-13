@@ -1,4 +1,5 @@
 """Config flow for Hiperdrift integration."""
+
 from __future__ import annotations
 
 from typing import Any
@@ -11,25 +12,28 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.selector import (
+    SelectSelector,
+    SelectSelectorConfig,
+    SelectSelectorMode,
     TextSelector,
     TextSelectorConfig,
     TextSelectorType,
-    selector,
 )
 
 from .const import (
     CONF_CITY,
     CONF_CITY_CHECK,
-    CONF_FYN,
+    CONF_FYN_REGION,
     CONF_GENERAL_MSG,
-    CONF_JYL,
+    CONF_JYL_REGION,
     CONF_REGION,
-    CONF_SJ_BH,
+    CONF_SJ_BH_REGION,
     CONF_STREET,
     CONF_STREET_CHECK,
     DOMAIN,
     DOMAIN_NAME,
     LOGGER,
+    TRANSLATION_KEY_REGION,
 )
 
 
@@ -79,16 +83,24 @@ def _create_form(
 
     return vol.Schema(
         {
-            vol.Required(
-                CONF_REGION,
-                default=user_input.get(CONF_REGION, "Sjælland og Bonholm"),
-            ): selector(
-                {
-                    "select": {
-                        "options": [CONF_SJ_BH, CONF_FYN, CONF_JYL],
-                    }
-                }
+            vol.Required(CONF_REGION, default=CONF_SJ_BH_REGION): SelectSelector(
+                SelectSelectorConfig(
+                    options=[CONF_SJ_BH_REGION, CONF_FYN_REGION, CONF_JYL_REGION],
+                    sort=True,
+                    mode=SelectSelectorMode.DROPDOWN,
+                    translation_key=TRANSLATION_KEY_REGION,
+                )
             ),
+            # vol.Required(
+            #     CONF_REGION,
+            #     default=user_input.get(CONF_REGION, "Sjælland og Bonholm"),
+            # ): selector(
+            #     {
+            #         "select": {
+            #             "options": [CONF_SJ_BH, CONF_FYN, CONF_JYL],
+            #         }
+            #     }
+            # ),
             vol.Required(
                 CONF_GENERAL_MSG,
                 default=user_input.get(CONF_GENERAL_MSG, True),
