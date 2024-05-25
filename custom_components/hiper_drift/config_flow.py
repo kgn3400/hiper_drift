@@ -32,7 +32,6 @@ from .const import (
     CONF_STREET_CHECK,
     DOMAIN,
     DOMAIN_NAME,
-    LOGGER,
     TRANSLATION_KEY_REGION,
 )
 
@@ -50,7 +49,6 @@ async def _validate_input(
     ):
         errors["base"] = "missing_selection"
         return False
-        # raise MissingSelection
 
     if CONF_CITY not in user_input:
         user_input[CONF_CITY] = ""
@@ -66,7 +64,6 @@ async def _validate_input(
     if user_input[CONF_STREET_CHECK] is True and user_input[CONF_STREET].strip() == "":
         errors[CONF_STREET] = "missing_street"
         return False
-        # raise MissingStreet
 
     # Return info that you want to store in the config entry.
     return True
@@ -147,15 +144,11 @@ class ConfigFlowHandler(ConfigFlow, domain=DOMAIN):
         self._abort_if_unique_id_configured()
 
         if user_input is not None:
-            try:
-                if await _validate_input(self.hass, user_input, errors):
-                    return self.async_create_entry(
-                        title=DOMAIN_NAME, data=user_input, options=user_input
-                    )
+            if await _validate_input(self.hass, user_input, errors):
+                return self.async_create_entry(
+                    title=DOMAIN_NAME, data=user_input, options=user_input
+                )
 
-            except Exception:  # pylint: disable=broad-except
-                LOGGER.exception("Unexpected exception")
-                errors["base"] = "unknown"
         else:
             user_input = {}
 
@@ -200,12 +193,8 @@ class OptionsFlowHandler(OptionsFlow):
         errors: dict[str, str] = {}
 
         if user_input is not None:
-            try:
-                if await _validate_input(self.hass, user_input, errors):
-                    return self.async_create_entry(title=DOMAIN_NAME, data=user_input)
-            except Exception:  # pylint: disable=broad-except
-                LOGGER.exception("Unexpected exception")
-                errors["base"] = "unknown"
+            if await _validate_input(self.hass, user_input, errors):
+                return self.async_create_entry(title=DOMAIN_NAME, data=user_input)
         else:
             user_input = self._options.copy()
 

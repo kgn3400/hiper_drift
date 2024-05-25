@@ -106,9 +106,8 @@ class HiperMsgSensor(ComponentEntity, SensorEntity):
             dict: Extra state attributes
 
         """
-        attr: dict = {}
 
-        return attr
+        return {"contents": self.component_api.contents}
 
     # ------------------------------------------------------
     @property

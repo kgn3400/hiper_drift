@@ -53,6 +53,7 @@ class ComponentApi:
         self.close_session: bool = False
         self.is_on: bool = False
         self.msg: str = ""
+        self.contents: str = ""
         self.coordinator: DataUpdateCoordinator
 
     # ------------------------------------------------------------------
@@ -69,14 +70,15 @@ class ComponentApi:
             self.session = ClientSession()
             self.close_session = True
 
-        self.msg = await self._async_check_hiper(self.region)
+        await self._async_check_hiper(self.region)
 
         if self.session and self.close_session:
             await self.session.close()
 
     # ------------------------------------------------------
-    async def _async_check_hiper(self, region: str) -> str:
-        msg: str = ""
+    async def _async_check_hiper(self, region: str) -> None:
+        self.msg: str = ""
+        self.contents = ""
         self.is_on = False
 
         if region == CONF_SJ_BH_REGION:
@@ -91,9 +93,6 @@ class ComponentApi:
             async with timeout(self.request_timeout):
                 response = await self.session.request("GET", url)
 
-                if response.real_url.path.upper().find("/region/".upper()) == -1:
-                    return msg
-
                 soup = BeautifulSoup(await response.text(), "html.parser")
 
             if (
@@ -104,7 +103,15 @@ class ComponentApi:
                 is None
             ):
                 self.is_on = True
-                msg = "Generelle driftsager"
+                self.msg = "Generelle driftsager"
+
+                tag = soup.select(
+                    "body > div.site-wrap > main > div.service-status-wrapper > section > div:nth-child(1) > ul > li > div > div.details"
+                )[0]
+                self.contents = tag.text.strip()
+
+            if response.real_url.path.upper().find("/region/".upper()) == -1:
+                return
 
             if (
                 self.city_check
@@ -114,7 +121,7 @@ class ComponentApi:
                 is not None
             ):
                 self.is_on = True
-                msg = "Lok" + "ale driftssager for " + self.city.strip()
+                self.msg = "Lok" + "ale driftssager for " + self.city.strip()
 
             if (
                 self.street_check
@@ -128,8 +135,9 @@ class ComponentApi:
                 is not None
             ):
                 self.is_on = True
-                msg = f"Lokale driftssager for {self.city.strip()} på {self.street}"
+                self.msg = (
+                    f"Lokale driftssager for {self.city.strip()} på {self.street}"
+                )
 
         except TimeoutError:
             pass
-        return msg
