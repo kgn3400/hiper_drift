@@ -1,4 +1,5 @@
 """The Hiper driftsstatus DK integration."""
+
 from __future__ import annotations
 
 from datetime import timedelta
@@ -33,6 +34,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data.setdefault(DOMAIN, {})
 
     component_api: ComponentApi = ComponentApi(
+        hass,
         session,
         entry.options[CONF_REGION],
         entry.options[CONF_GENERAL_MSG],
@@ -96,4 +98,3 @@ async def update_listener(
 
     await hass.config_entries.async_reload(config_entry.entry_id)
     await component_api.async_update()
-

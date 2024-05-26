@@ -8,7 +8,7 @@ import re
 from aiohttp.client import ClientSession
 from bs4 import BeautifulSoup
 
-from homeassistant.core import ServiceCall
+from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .const import CONF_FYN_REGION, CONF_SJ_BH_REGION
@@ -22,6 +22,7 @@ class ComponentApi:
 
     def __init__(
         self,
+        hass: HomeAssistant,
         session: ClientSession | None,
         region: str,
         general_msg: bool,
@@ -32,6 +33,7 @@ class ComponentApi:
     ) -> None:
         """Hiper api."""
 
+        self.hass: HomeAssistant = hass
         self.session: ClientSession | None = session
         self.region: str = region
         self.general_msg: bool = general_msg
@@ -99,7 +101,9 @@ class ComponentApi:
                     "GET", "https://www.hiper.dk/drift"
                 )
 
-                soup = BeautifulSoup(await response.text(), "html.parser")
+                soup = await self.hass.async_add_executor_job(
+                    BeautifulSoup, await response.text(), "lxml"
+                )
 
             if (
                 self.general_msg
@@ -122,7 +126,9 @@ class ComponentApi:
             async with timeout(self.request_timeout):
                 response = await self.session.request("GET", url_region)
 
-                soup = BeautifulSoup(await response.text(), "html.parser")
+                soup = await self.hass.async_add_executor_job(
+                    BeautifulSoup, await response.text(), "lxml"
+                )
 
             if response.real_url.path.upper().find("/region/".upper()) == -1:
                 if (

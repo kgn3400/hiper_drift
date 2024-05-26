@@ -11,10 +11,10 @@
   "iot_class": "cloud_polling",
   "requirements": [
     "beautifulsoup4",
-    "html.parser"
+    "lxml"
   ],
   "single_config_entry": true,
   "ssdp": [],
-  "version": "1.0.13",
+  "version": "1.0.14",
   "zeroconf": []
 }
