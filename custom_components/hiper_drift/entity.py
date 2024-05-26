@@ -30,6 +30,6 @@ class ComponentEntity(CoordinatorEntity[DataUpdateCoordinator], Entity):
             identifiers={(DOMAIN, DOMAIN_NAME)},
             manufacturer="KGN",
             suggested_area="",
-            sw_version="1.0.12",
+            sw_version="1.0.13",
             name=DOMAIN_NAME,
         )

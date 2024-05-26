@@ -2,6 +2,7 @@
 
 from asyncio import timeout
 from dataclasses import dataclass
+from datetime import UTC, datetime
 import re
 
 from aiohttp.client import ClientSession
@@ -29,18 +30,7 @@ class ComponentApi:
         street_check: bool,
         street: str,
     ) -> None:
-        """Hiper api.
-
-        Args:
-            session (ClientSession | None): _description_
-            region (str): _description_
-            general_msg (bool): _description_
-            city_check (bool): _description_
-            city (str): _description_
-            street_check (bool): _description_
-            street (str): _description_
-
-        """
+        """Hiper api."""
 
         self.session: ClientSession | None = session
         self.region: str = region
@@ -55,6 +45,7 @@ class ComponentApi:
         self.msg: str = ""
         self.content: str = ""
         self.coordinator: DataUpdateCoordinator
+        self.last_updated: datetime = None
 
     # ------------------------------------------------------------------
     async def async_reset_service(self, call: ServiceCall) -> None:
@@ -112,14 +103,13 @@ class ComponentApi:
 
             if (
                 self.general_msg
-                and soup.find(
-                    string=re.compile("Ingen Generelle driftssager", re.IGNORECASE)
-                )
-                is None
                 and (
-                    soup.find(string=re.compile("Generelle driftssager", re.IGNORECASE))
-                    is not None
+                    xx := soup.find(
+                        string=re.compile("Generelle driftssager", re.IGNORECASE)
+                    )
                 )
+                is not None
+                and not xx.strip().startswith("Ingen")
             ):
                 tmp_msg = "Generelle driftsager"
 
@@ -174,10 +164,12 @@ class ComponentApi:
                     self.msg = tmp_msg
                     self.content = tmp_content
                     self.is_on = True
+                    self.last_updated = datetime.now(UTC)
             else:
                 self.msg = ""
                 self.content = ""
                 self.is_on = False
+                self.last_updated = None
 
         except TimeoutError:
             pass

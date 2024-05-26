@@ -107,7 +107,14 @@ class HiperMsgSensor(ComponentEntity, SensorEntity):
 
         """
 
-        return {"content": self.component_api.content}
+        attr: dict = {}
+
+        attr["content"] = self.component_api.content
+
+        if self.component_api.last_updated is not None:
+            attr["last_updated"] = self.component_api.last_updated
+
+        return attr
 
     # ------------------------------------------------------
     @property
