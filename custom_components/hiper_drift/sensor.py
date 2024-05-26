@@ -107,7 +107,7 @@ class HiperMsgSensor(ComponentEntity, SensorEntity):
 
         """
 
-        return {"contents": self.component_api.contents}
+        return {"content": self.component_api.content}
 
     # ------------------------------------------------------
     @property

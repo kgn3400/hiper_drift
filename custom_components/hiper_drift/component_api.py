@@ -49,16 +49,25 @@ class ComponentApi:
         self.city: str = city
         self.street_check: bool = street_check
         self.street: str = street
-        self.request_timeout: int = 5
+        self.request_timeout: int = 10
         self.close_session: bool = False
         self.is_on: bool = False
         self.msg: str = ""
-        self.contents: str = ""
+        self.content: str = ""
         self.coordinator: DataUpdateCoordinator
+
+    # ------------------------------------------------------------------
+    async def async_reset_service(self, call: ServiceCall) -> None:
+        """Hiper service interface."""
+        self.is_on = False
+        await self.coordinator.async_request_refresh()
 
     # ------------------------------------------------------------------
     async def async_update_service(self, call: ServiceCall) -> None:
         """Hiper service interface."""
+        self.msg = ""
+        self.content = ""
+
         await self.async_update()
         await self.coordinator.async_request_refresh()
 
@@ -77,21 +86,27 @@ class ComponentApi:
 
     # ------------------------------------------------------
     async def _async_check_hiper(self, region: str) -> None:
-        self.msg: str = ""
-        self.contents = ""
-        self.is_on = False
+        # self.msg: str = ""
+        # self.content = ""
+        # self.is_on = False
+
+        tmp_msg: str = ""
+        tmp_content: str = ""
+        is_updated: bool = False
 
         if region == CONF_SJ_BH_REGION:
-            url: str = "https://www.hiper.dk/drift/region/sjaelland-og-bornholm"
+            url_region: str = "https://www.hiper.dk/drift/region/sjaelland-og-bornholm"
         elif region == CONF_FYN_REGION:
-            url = "https://www.hiper.dk/drift/region/fyn"
+            url_region = "https://www.hiper.dk/drift/region/fyn"
 
         else:  # region == CONF_JYL_REGION:
-            url = "https://www.hiper.dk/drift/region/jylland"
+            url_region = "https://www.hiper.dk/drift/region/jylland"
 
         try:
             async with timeout(self.request_timeout):
-                response = await self.session.request("GET", url)
+                response = await self.session.request(
+                    "GET", "https://www.hiper.dk/drift"
+                )
 
                 soup = BeautifulSoup(await response.text(), "html.parser")
 
@@ -101,43 +116,68 @@ class ComponentApi:
                     string=re.compile("Ingen Generelle driftssager", re.IGNORECASE)
                 )
                 is None
+                and (
+                    soup.find(string=re.compile("Generelle driftssager", re.IGNORECASE))
+                    is not None
+                )
             ):
-                self.is_on = True
-                self.msg = "Generelle driftsager"
+                tmp_msg = "Generelle driftsager"
 
                 tag = soup.select(
                     "body > div.site-wrap > main > div.service-status-wrapper > section > div:nth-child(1) > ul > li > div > div.details"
                 )[0]
-                self.contents = tag.text.strip()
+                tmp_content = tag.text.strip()
+                is_updated = True
+
+            async with timeout(self.request_timeout):
+                response = await self.session.request("GET", url_region)
+
+                soup = BeautifulSoup(await response.text(), "html.parser")
 
             if response.real_url.path.upper().find("/region/".upper()) == -1:
-                return
+                if (
+                    self.city_check
+                    and (
+                        xx := soup.find(
+                            string=re.compile(
+                                " " + self.city.strip() + " ", re.IGNORECASE
+                            )
+                        )
+                    )
+                    is not None
+                ):
+                    tmp_msg = "Lok" + f"ale driftssager for {self.city.strip()}"
+                    tmp_content = xx.strip()
+                    is_updated = True
 
-            if (
-                self.city_check
-                and soup.find(
-                    string=re.compile(" " + self.city.strip() + " ", re.IGNORECASE)
-                )
-                is not None
-            ):
-                self.is_on = True
-                self.msg = "Lok" + "ale driftssager for " + self.city.strip()
+                if (
+                    self.street_check
+                    and soup.find(
+                        string=re.compile(" " + self.city.strip() + " ", re.IGNORECASE)
+                    )
+                    is not None
+                    and (
+                        xx := soup.find(
+                            string=re.compile(" " + self.street.strip(), re.IGNORECASE)
+                        )
+                    )
+                    is not None
+                ):
+                    tmp_msg = (
+                        f"Lokale driftssager for {self.city.strip()} på {self.street}"
+                    )
+                    tmp_content = xx.strip()
+                    is_updated = True
 
-            if (
-                self.street_check
-                and soup.find(
-                    string=re.compile(" " + self.city.strip() + " ", re.IGNORECASE)
-                )
-                is not None
-                and soup.find(
-                    string=re.compile(" " + self.street.strip(), re.IGNORECASE)
-                )
-                is not None
-            ):
-                self.is_on = True
-                self.msg = (
-                    f"Lokale driftssager for {self.city.strip()} på {self.street}"
-                )
+            if is_updated:
+                if tmp_msg != self.msg or tmp_content != self.content:
+                    self.msg = tmp_msg
+                    self.content = tmp_content
+                    self.is_on = True
+            else:
+                self.msg = ""
+                self.content = ""
+                self.is_on = False
 
         except TimeoutError:
             pass

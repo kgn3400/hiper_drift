@@ -1,4 +1,5 @@
 """Services for Hiper integration."""
+
 from homeassistant.core import HomeAssistant
 
 from .component_api import ComponentApi
@@ -11,3 +12,4 @@ async def async_setup_services(
     """Set up the services for the Hiper integration."""
 
     hass.services.async_register(DOMAIN, "update", component_api.async_update_service)
+    hass.services.async_register(DOMAIN, "reset", component_api.async_reset_service)

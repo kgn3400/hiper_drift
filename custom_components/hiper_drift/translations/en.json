@@ -64,6 +64,10 @@
     "update": {
       "description": "Update Hiper drift status.",
       "name": "Update"
+    },
+    "reset": {
+      "description": "Reset Hiper drift status.",
+      "name": "Reset"
     }
   }
 }

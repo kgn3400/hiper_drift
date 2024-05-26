@@ -64,6 +64,10 @@
     "update": {
       "description": "Opdater Hiper drift status.",
       "name": "Opdater"
+    },
+    "reset": {
+      "description": "Nulstil Hiper drift status.",
+      "name": "Nulstil"
     }
   }
 }
