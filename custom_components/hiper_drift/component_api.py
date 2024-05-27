@@ -107,13 +107,12 @@ class ComponentApi:
 
             if (
                 self.general_msg
-                and (
-                    xx := soup.find(
-                        string=re.compile("Generelle driftssager", re.IGNORECASE)
-                    )
-                )
+                and soup.find(string=re.compile("generelle driftssager", re.IGNORECASE))
                 is not None
-                and not xx.strip().startswith("Ingen")
+                and soup.find(
+                    string=re.compile("ingen generelle driftssager", re.IGNORECASE)
+                )
+                is None
             ):
                 tmp_msg = "Generelle driftsager"
 
