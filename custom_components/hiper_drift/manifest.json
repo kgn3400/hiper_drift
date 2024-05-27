@@ -6,9 +6,10 @@
   ],
   "config_flow": true,
   "dependencies": [],
-  "documentation": "https://github.com/kgn3400/hiper_driftsstatus_dk",
+  "documentation": "https://github.com/kgn3400/hiper_drift",
   "homekit": {},
   "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/kgn3400/hiper_drift/issues",
   "requirements": [
     "beautifulsoup4",
     "lxml"
