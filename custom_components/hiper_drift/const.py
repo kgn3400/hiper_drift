@@ -16,6 +16,8 @@ CONF_GENERAL_MSG = "general_msg"
 CONF_SJ_BH = "Sjælland og Bonholm"
 CONF_FYN = "Fyn"
 CONF_JYL = "Jylland"
+CONF_MSG = "message"
+CONF_CONTENT = "content"
 
 TRANSLATION_KEY_REGION = "region"
 CONF_SJ_BH_REGION = "sj_bh"

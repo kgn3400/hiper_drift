@@ -60,6 +60,29 @@
       }
     }
   },
+  "entity": {
+    "sensor": {
+      "hiper_drift": {
+        "state_attributes": {
+          "content": {
+            "name": "Indhold"
+          },
+          "last_updated": {
+            "name": "Sidste opdatering"
+          }
+        }
+      }
+    },
+    "binary_sensor": {
+      "hiper_drift": {
+        "state_attributes": {
+          "message": {
+            "name": "Besked"
+          }
+        }
+      }
+    }
+  },
   "services": {
     "update": {
       "description": "Opdater Hiper drift status.",

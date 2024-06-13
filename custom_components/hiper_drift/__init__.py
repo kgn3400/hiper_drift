@@ -35,6 +35,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     component_api: ComponentApi = ComponentApi(
         hass,
+        entry,
         session,
         entry.options[CONF_REGION],
         entry.options[CONF_GENERAL_MSG],

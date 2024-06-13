@@ -4,14 +4,16 @@ from asyncio import timeout
 from dataclasses import dataclass
 from datetime import UTC, datetime
 import re
+from typing import Any
 
 from aiohttp.client import ClientSession
 from bs4 import BeautifulSoup
 
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
-from .const import CONF_FYN_REGION, CONF_SJ_BH_REGION
+from .const import CONF_CONTENT, CONF_FYN_REGION, CONF_MSG, CONF_SJ_BH_REGION
 
 
 # ------------------------------------------------------------------
@@ -23,6 +25,7 @@ class ComponentApi:
     def __init__(
         self,
         hass: HomeAssistant,
+        entry: ConfigEntry,
         session: ClientSession | None,
         region: str,
         general_msg: bool,
@@ -34,6 +37,7 @@ class ComponentApi:
         """Hiper api."""
 
         self.hass: HomeAssistant = hass
+        self.entry: ConfigEntry = entry
         self.session: ClientSession | None = session
         self.region: str = region
         self.general_msg: bool = general_msg
@@ -44,8 +48,8 @@ class ComponentApi:
         self.request_timeout: int = 10
         self.close_session: bool = False
         self.is_on: bool = False
-        self.msg: str = ""
-        self.content: str = ""
+        self.msg: str = self.entry.options.get(CONF_MSG, "")
+        self.content: str = self.entry.options.get(CONF_CONTENT, "")
         self.coordinator: DataUpdateCoordinator
         self.last_updated: datetime = None
 
@@ -60,6 +64,7 @@ class ComponentApi:
         """Hiper service interface."""
         self.msg = ""
         self.content = ""
+        self.update_config("", "")
 
         await self.async_update()
         await self.coordinator.async_request_refresh()
@@ -79,10 +84,6 @@ class ComponentApi:
 
     # ------------------------------------------------------
     async def _async_check_hiper(self, region: str) -> None:
-        # self.msg: str = ""
-        # self.content = ""
-        # self.is_on = False
-
         tmp_msg: str = ""
         tmp_content: str = ""
         is_updated: bool = False
@@ -159,7 +160,8 @@ class ComponentApi:
                     is not None
                 ):
                     tmp_msg = (
-                        f"Lokale driftssager for {self.city.strip()} på {self.street}"
+                        "Lok"
+                        f"ale driftssager for {self.city.strip()} på {self.street}"
                     )
                     tmp_content = xx.strip()
                     is_updated = True
@@ -170,7 +172,11 @@ class ComponentApi:
                     self.content = tmp_content
                     self.is_on = True
                     self.last_updated = datetime.now(UTC)
+                    self.update_config(tmp_msg, tmp_content)
             else:
+                if self.is_on:
+                    self.update_config("", "")
+
                 self.msg = ""
                 self.content = ""
                 self.is_on = False
@@ -178,3 +184,15 @@ class ComponentApi:
 
         except TimeoutError:
             pass
+
+    # ------------------------------------------------------------------
+    def update_config(self, msg: str, content: str) -> None:
+        """Update config."""
+
+        tmp_options: dict[str, Any] = self.entry.options.copy()
+        tmp_options[CONF_MSG] = msg
+        tmp_options[CONF_CONTENT] = content
+
+        self.hass.config_entries.async_update_entry(
+            self.entry, data=tmp_options, options=tmp_options
+        )
