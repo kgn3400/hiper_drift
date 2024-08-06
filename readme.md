@@ -18,6 +18,6 @@ Or click
 
 Configuration is setup via UI in Home assistant. To add one, go to [Settings > Devices & Services](https://my.home-assistant.io/redirect/integrations) and click the add button. Next choose the [Hiper drift](https://my.home-assistant.io/redirect/config_flow_start?domain=hiper_drift) option.
 
-## Services
+## Actions
 
-Available services: __update__
+Available actions: __update__
