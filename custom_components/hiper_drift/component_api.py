@@ -13,7 +13,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
-from .const import CONF_CONTENT, CONF_FYN_REGION, CONF_MSG, CONF_SJ_BH_REGION
+from .const import CONF_CONTENT, CONF_FYN_REGION, CONF_MSG, CONF_SJ_BH_REGION, DOMAIN
 
 
 # ------------------------------------------------------------------
@@ -52,6 +52,10 @@ class ComponentApi:
         self.content: str = self.entry.options.get(CONF_CONTENT, "")
         self.coordinator: DataUpdateCoordinator
         self.last_updated: datetime = None
+
+        """Setup the actions for the Hiper integration."""
+        hass.services.async_register(DOMAIN, "update", self.async_update_service)
+        hass.services.async_register(DOMAIN, "reset", self.async_reset_service)
 
     # ------------------------------------------------------------------
     async def async_reset_service(self, call: ServiceCall) -> None:
