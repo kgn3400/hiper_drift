@@ -2,7 +2,7 @@
 
 from asyncio import timeout
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 import re
 from typing import Any
 
@@ -25,6 +25,7 @@ class ComponentApi:
     def __init__(
         self,
         hass: HomeAssistant,
+        coordinator: DataUpdateCoordinator,
         entry: ConfigEntry,
         session: ClientSession | None,
         region: str,
@@ -37,6 +38,7 @@ class ComponentApi:
         """Hiper api."""
 
         self.hass: HomeAssistant = hass
+        self.coordinator: DataUpdateCoordinator = coordinator
         self.entry: ConfigEntry = entry
         self.session: ClientSession | None = session
         self.region: str = region
@@ -45,13 +47,16 @@ class ComponentApi:
         self.city: str = city
         self.street_check: bool = street_check
         self.street: str = street
+
         self.request_timeout: int = 10
         self.close_session: bool = False
         self.is_on: bool = False
         self.msg: str = self.entry.options.get(CONF_MSG, "")
         self.content: str = self.entry.options.get(CONF_CONTENT, "")
-        self.coordinator: DataUpdateCoordinator
         self.last_updated: datetime = None
+
+        self.coordinator.update_interval = timedelta(minutes=15)
+        self.coordinator.update_method = self.async_update
 
         """Setup the actions for the Hiper integration."""
         hass.services.async_register(DOMAIN, "update", self.async_update_service)
@@ -81,13 +86,14 @@ class ComponentApi:
             self.session = ClientSession()
             self.close_session = True
 
-        await self._async_check_hiper(self.region)
+        await self.async_check_hiper(self.region)
 
         if self.session and self.close_session:
             await self.session.close()
 
     # ------------------------------------------------------
-    async def _async_check_hiper(self, region: str) -> None:
+    async def async_check_hiper(self, region: str) -> None:
+        """Check if Hiper drift."""
         tmp_msg: str = ""
         tmp_content: str = ""
         is_updated: bool = False
