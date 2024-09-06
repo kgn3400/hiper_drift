@@ -19,6 +19,7 @@ from .const import (
     CONF_CONTENT,
     CONF_FYN_REGION,
     CONF_GENERAL_MSG,
+    CONF_IS_ON,
     CONF_MSG,
     CONF_REGION,
     CONF_SJ_BH_REGION,
@@ -57,10 +58,11 @@ class ComponentApi:
 
         self.request_timeout: int = 10
         self.close_session: bool = False
-        self.is_on: bool = False
+        self.is_on: bool = self.entry.options.get(CONF_IS_ON, False)
         self.msg: str = self.entry.options.get(CONF_MSG, "")
         self.content: str = self.entry.options.get(CONF_CONTENT, "")
         self.last_updated: datetime = None
+        self.supress_update_listener: bool = False
 
         self.coordinator.update_interval = timedelta(minutes=15)
         self.coordinator.update_method = self.async_update
@@ -73,6 +75,9 @@ class ComponentApi:
     async def async_reset_service(self, call: ServiceCall) -> None:
         """Hiper service interface."""
         self.is_on = False
+        self.msg = ""
+        self.content = ""
+        await self.update_config()
         await self.coordinator.async_request_refresh()
 
     # ------------------------------------------------------------------
@@ -80,7 +85,7 @@ class ComponentApi:
         """Hiper service interface."""
         self.msg = ""
         self.content = ""
-        self.update_config("", "")
+        await self.update_config()
 
         await self.async_update()
         await self.coordinator.async_request_refresh()
@@ -189,10 +194,10 @@ class ComponentApi:
                     self.content = tmp_content
                     self.is_on = True
                     self.last_updated = datetime.now(UTC)
-                    self.update_config(tmp_msg, tmp_content)
+                    await self.update_config(tmp_msg, tmp_content, True)
             else:
                 if self.is_on:
-                    self.update_config("", "")
+                    await self.update_config()
 
                 self.msg = ""
                 self.content = ""
@@ -203,12 +208,16 @@ class ComponentApi:
             pass
 
     # ------------------------------------------------------------------
-    def update_config(self, msg: str, content: str) -> None:
+    async def update_config(
+        self, msg: str = "", content: str = "", is_on: bool = False
+    ) -> None:
         """Update config."""
 
         tmp_options: dict[str, Any] = self.entry.options.copy()
         tmp_options[CONF_MSG] = msg
         tmp_options[CONF_CONTENT] = content
+        tmp_options[CONF_IS_ON] = is_on
+        self.supress_update_listener = True
 
         self.hass.config_entries.async_update_entry(
             self.entry, data=tmp_options, options=tmp_options

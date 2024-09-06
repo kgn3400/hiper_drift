@@ -53,9 +53,10 @@ class HiperBinarySensor(ComponentEntity, BinarySensorEntity):
 
         """
         super().__init__(coordinator, entry)
+        self.entry: ConfigEntry = entry
 
         self.component_api = component_api
-        self.coordinator = coordinator
+        # self.coordinator = coordinator
 
         self._name = "Status"
         self._unique_id = "status"
@@ -129,3 +130,16 @@ class HiperBinarySensor(ComponentEntity, BinarySensorEntity):
         self.async_on_remove(
             self.coordinator.async_add_listener(self.async_write_ha_state)
         )
+
+    # ------------------------------------------------------
+    # async def async_will_remove_from_hass(self) -> None:
+    #     """Run when entity will be removed from hass."""
+
+    #     tmp_options: dict[str, Any] = self.entry.options.copy()
+    #     tmp_options["test_slut"] = "hej der"
+
+    #     self.hass.config_entries.async_update_entry(
+    #         self.entry,
+    #         data=tmp_options,
+    #         options=tmp_options,
+    #     )

@@ -55,7 +55,7 @@ class HiperMsgSensor(ComponentEntity, SensorEntity):
         super().__init__(coordinator, entry)
 
         self.component_api = component_api
-        self.coordinator = coordinator
+        # self.coordinator = coordinator
         self._name = "Message"
         self._unique_id = "message"
 
