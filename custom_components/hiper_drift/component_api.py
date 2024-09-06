@@ -75,8 +75,6 @@ class ComponentApi:
     async def async_reset_service(self, call: ServiceCall) -> None:
         """Hiper service interface."""
         self.is_on = False
-        self.msg = ""
-        self.content = ""
         await self.update_config()
         await self.coordinator.async_request_refresh()
 
