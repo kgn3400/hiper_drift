@@ -92,7 +92,7 @@ class HiperBinarySensor(ComponentEntity, BinarySensorEntity):
 
         attr: dict = {}
 
-        attr["message"] = self.component_api.msg
+        attr["message"] = self.component_api.msg if self.component_api.is_on else ""
 
         return attr
 
@@ -130,16 +130,3 @@ class HiperBinarySensor(ComponentEntity, BinarySensorEntity):
         self.async_on_remove(
             self.coordinator.async_add_listener(self.async_write_ha_state)
         )
-
-    # ------------------------------------------------------
-    # async def async_will_remove_from_hass(self) -> None:
-    #     """Run when entity will be removed from hass."""
-
-    #     tmp_options: dict[str, Any] = self.entry.options.copy()
-    #     tmp_options["test_slut"] = "hej der"
-
-    #     self.hass.config_entries.async_update_entry(
-    #         self.entry,
-    #         data=tmp_options,
-    #         options=tmp_options,
-    #     )

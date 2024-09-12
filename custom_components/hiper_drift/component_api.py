@@ -192,7 +192,7 @@ class ComponentApi:
                     self.content = tmp_content
                     self.is_on = True
                     self.last_updated = datetime.now(UTC)
-                    await self.update_config(tmp_msg, tmp_content, True)
+                    await self.update_config()
             else:
                 if self.is_on:
                     await self.update_config()
@@ -206,15 +206,13 @@ class ComponentApi:
             pass
 
     # ------------------------------------------------------------------
-    async def update_config(
-        self, msg: str = "", content: str = "", is_on: bool = False
-    ) -> None:
+    async def update_config(self) -> None:
         """Update config."""
 
         tmp_options: dict[str, Any] = self.entry.options.copy()
-        tmp_options[CONF_MSG] = msg
-        tmp_options[CONF_CONTENT] = content
-        tmp_options[CONF_IS_ON] = is_on
+        tmp_options[CONF_MSG] = self.msg
+        tmp_options[CONF_CONTENT] = self.content
+        tmp_options[CONF_IS_ON] = self.is_on
         self.supress_update_listener = True
 
         self.hass.config_entries.async_update_entry(
