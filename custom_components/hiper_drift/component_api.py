@@ -20,6 +20,7 @@ from .const import (
     CONF_FYN_REGION,
     CONF_GENERAL_MSG,
     CONF_IS_ON,
+    CONF_JYL_REGION,
     CONF_MSG,
     CONF_REGION,
     CONF_SJ_BH_REGION,
@@ -107,20 +108,11 @@ class ComponentApi:
         tmp_msg: str = ""
         tmp_content: str = ""
         is_updated: bool = False
-
-        if region == CONF_SJ_BH_REGION:
-            url_region: str = "https://www.hiper.dk/drift/region/sjaelland-og-bornholm"
-        elif region == CONF_FYN_REGION:
-            url_region = "https://www.hiper.dk/drift/region/fyn"
-
-        else:  # region == CONF_JYL_REGION:
-            url_region = "https://www.hiper.dk/drift/region/jylland"
+        ROOT_DRIFT_URL: str = "https://www.hiper.dk/drift/"
 
         try:
             async with timeout(self.request_timeout):
-                response = await self.session.request(
-                    "GET", "https://www.hiper.dk/drift"
-                )
+                response = await self.session.get(ROOT_DRIFT_URL)
 
                 soup = await self.hass.async_add_executor_job(
                     BeautifulSoup, await response.text(), "lxml"
@@ -143,8 +135,19 @@ class ComponentApi:
                 tmp_content = tag.text.strip()
                 is_updated = True
 
+            if region == CONF_SJ_BH_REGION:
+                url_region: str = ROOT_DRIFT_URL + "region/sjaelland-og-bornholm"
+            elif region == CONF_FYN_REGION:
+                url_region = ROOT_DRIFT_URL + "region/fyn"
+
+            elif region == CONF_JYL_REGION:
+                url_region = ROOT_DRIFT_URL + "region/jylland"
+
+            else:
+                ROOT_DRIFT_URL = "https://www.fail.xx"
+
             async with timeout(self.request_timeout):
-                response = await self.session.request("GET", url_region)
+                response = await self.session.get(url_region)
 
                 soup = await self.hass.async_add_executor_job(
                     BeautifulSoup, await response.text(), "lxml"
