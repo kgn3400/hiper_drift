@@ -129,9 +129,15 @@ class ComponentApi:
             ):
                 tmp_msg = "Generelle driftsager"
 
-                tag = soup.select(
-                    "body > div.site-wrap > main > div.service-status-wrapper > section > div:nth-child(1) > ul > li > div > div.details"
-                )[0]
+                try:
+                    tag = soup.select(
+                        "body > div.site-wrap > main > div.service-status-wrapper > section > div:nth-child(1) > ul > li > div > div.details"
+                    )[0]
+                except IndexError:
+                    tag = soup.select(
+                        "body > div.site-wrap > main > div.service-status-wrapper > section > div:nth-child(2) > ul > li > div > div.details"
+                    )[0]
+
                 tmp_content = tag.text.strip()
                 is_updated = True
 
