@@ -5,13 +5,15 @@ from __future__ import annotations
 from homeassistant.components.sensor import (  # SensorDeviceClass,; SensorEntityDescription,
     SensorEntity,
 )
+from homeassistant.const import MATCH_ALL
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import CommonConfigEntry
 from .component_api import ComponentApi
-from .const import TRANSLATION_KEY
+from .const import TRANSLATION_KEY, IssueType
 from .entity import ComponentEntity
+from .hass_util import object_to_state_attr_dict
 
 
 # ------------------------------------------------------
@@ -24,34 +26,34 @@ async def async_setup_entry(
 
     sensors = []
 
-    sensors.append(HiperMsgSensor(entry))
+    sensors.append(HiperIssueSensor(hass, entry, IssueType.regional))
+    sensors.append(HiperIssueSensor(hass, entry, IssueType.generel))
 
     async_add_entities(sensors)
 
 
 # ------------------------------------------------------
 # ------------------------------------------------------
-class HiperMsgSensor(ComponentEntity, SensorEntity):
+class HiperIssueSensor(ComponentEntity, SensorEntity):
     """Sensor class Hiper."""
+
+    _unrecorded_attributes = frozenset({MATCH_ALL})
 
     # ------------------------------------------------------
     def __init__(
         self,
+        hass: HomeAssistant,
         entry: CommonConfigEntry,
+        issue_type: IssueType,
     ) -> None:
-        """Hiper msg sensor.
-
-        Args:
-            coordinator (DataUpdateCoordinator): _description_
-            entry (ConfigEntry): _description_
-            component_api (ComponentApi): _description_
-
-        """
+        """Hiper issue sensor."""
         super().__init__(entry.runtime_data.coordinator, entry)
+        self.hass: HomeAssistant = hass
 
         self.component_api: ComponentApi = entry.runtime_data.component_api
-        self._name = "Message"
-        self._unique_id = "message"
+        self.issue_type: IssueType = issue_type
+        self._name = str(issue_type)
+        self._unique_id = str(issue_type)
 
         self.translation_key = TRANSLATION_KEY
 
@@ -74,7 +76,15 @@ class HiperMsgSensor(ComponentEntity, SensorEntity):
             str | None: Native value
 
         """
-        return self.component_api.msg
+
+        if self.issue_type == IssueType.regional:
+            if self.component_api.issue_regional is None:
+                return None
+            return self.component_api.issue_regional.text
+
+        if self.component_api.issue_general is None:
+            return None
+        return self.component_api.issue_general.text
 
     # ------------------------------------------------------
     @property
@@ -86,14 +96,10 @@ class HiperMsgSensor(ComponentEntity, SensorEntity):
 
         """
 
-        attr: dict = {}
+        if self.issue_type == IssueType.regional:
+            return object_to_state_attr_dict(self.component_api.issue_regional)
 
-        attr["content"] = self.component_api.content if self.component_api.is_on else ""
-
-        if self.component_api.last_updated is not None:
-            attr["last_updated"] = self.component_api.last_updated
-
-        return attr
+        return object_to_state_attr_dict(self.component_api.issue_general)
 
     # ------------------------------------------------------
     @property

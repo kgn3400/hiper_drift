@@ -18,12 +18,10 @@
     "step": {
       "user": {
         "data": {
-          "city_check": "Check operation cases for city",
-          "city": "City",
-          "general_msg": "General operation cases",
           "region": "Region",
-          "street_check": "Check operation cases for Street",
-          "street": "Street"
+          "match_list": "List of words which should match in region cases",
+          "match_case": "Match case",
+          "match_word": "Match the whole word"
         }
       }
     }
@@ -41,12 +39,9 @@
     "step": {
       "init": {
         "data": {
-          "city_check": "Check operation cases for city",
-          "city": "City",
-          "general_msg": "General operation cases",
-          "region": "Region",
-          "street_check": "Check operation cases for Street",
-          "street": "Street"
+          "match_list": "List of words which should match in region cases",
+          "match_case": "Match case",
+          "match_word": "Match the whole word"
         }
       }
     }
@@ -54,9 +49,9 @@
   "selector": {
     "region": {
       "options": {
-        "sj_bh": "Sjælland og Bonholm",
-        "fyn": "Fyn",
-        "jylland": "Jylland"
+        "sj_bh_1": "Sjælland og Bonholm",
+        "fyn_2": "Fyn",
+        "jylland_3": "Jylland"
       }
     }
   },

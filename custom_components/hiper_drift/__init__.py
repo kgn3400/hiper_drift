@@ -12,8 +12,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .component_api import ComponentApi
 from .const import DOMAIN, LOGGER
-
-PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR, Platform.SENSOR]
+from .hass_util import check_supress_config_update_listener
 
 
 # ------------------------------------------------------------------
@@ -47,13 +46,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: CommonConfigEntry) -> bo
         async_get_clientsession(hass),
     )
 
-    entry.async_on_unload(entry.add_update_listener(update_listener))
+    entry.async_on_unload(entry.add_update_listener(config_update_listener))
     entry.runtime_data = CommonData(
         component_api=component_api,
         coordinator=coordinator,
     )
 
-    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    await hass.config_entries.async_forward_entry_setups(entry, [Platform.SENSOR])
 
     await coordinator.async_config_entry_first_refresh()
 
@@ -63,7 +62,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: CommonConfigEntry) -> bo
 # ------------------------------------------------------------------
 async def async_unload_entry(hass: HomeAssistant, entry: CommonConfigEntry) -> bool:
     """Unload a config entry."""
-    return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    return await hass.config_entries.async_unload_platforms(entry, [Platform.SENSOR])
 
 
 # ------------------------------------------------------------------
@@ -74,14 +73,18 @@ async def async_reload_entry(hass: HomeAssistant, entry: CommonConfigEntry) -> N
 
 
 # ------------------------------------------------------------------
-async def update_listener(
+@check_supress_config_update_listener()
+async def config_update_listener(
     hass: HomeAssistant,
     config_entry: CommonConfigEntry,
 ) -> None:
     """Reload on config entry update."""
 
-    if config_entry.runtime_data.component_api.supress_update_listener:
-        config_entry.runtime_data.component_api.supress_update_listener = False
-        return
+    # hmm: bool = hasattr(config_entry.runtime_data, "component_api")
+    # dd = getattr(config_entry.runtime_data, "component_api")
+    # hmm: bool = hasattr(dd, "_supress_update_listener")
 
+    # if config_entry.runtime_data.component_api._supress_update_listener:
+    #     config_entry.runtime_data.component_api._supress_update_listener = False
+    #     return
     await hass.config_entries.async_reload(config_entry.entry_id)

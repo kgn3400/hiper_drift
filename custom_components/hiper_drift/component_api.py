@@ -2,39 +2,95 @@
 
 from asyncio import timeout
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
-import re
+from datetime import timedelta
+from re import IGNORECASE, Pattern, compile, escape
 from typing import Any
 
 from aiohttp.client import ClientSession
-from bs4 import BeautifulSoup
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .const import (
-    CONF_CITY,
-    CONF_CITY_CHECK,
-    CONF_CONTENT,
-    CONF_FYN_REGION,
-    CONF_GENERAL_MSG,
-    CONF_IS_ON,
-    CONF_JYL_REGION,
-    CONF_MSG,
+    CONF_MATCH_CASE,
+    CONF_MATCH_LIST,
+    CONF_MATCH_WORD,
+    CONF_READ_GLOBAL,
+    CONF_READ_REGIONAL,
     CONF_REGION,
-    CONF_SJ_BH_REGION,
-    CONF_STREET,
-    CONF_STREET_CHECK,
+    CONF_UPDATED_AT_GLOBAL,
+    CONF_UPDATED_AT_REGIONAL,
     DOMAIN,
+)
+from .hass_util import (
+    DictToObject,
+    JsonExt,
+    handle_retries,
+    set_supress_config_update_listener,
 )
 
 
 # ------------------------------------------------------------------
 # ------------------------------------------------------------------
 @dataclass
+class IssueItem:
+    """Issue item."""
+
+    def __init__(self) -> None:
+        """Init."""
+        self.subject: str | None = None
+        self.created_dtm: str | None = None
+        self.area: str | None = None
+        self.eta: str | None = None
+        self.region: str | None = None
+        self.region_id: int | None = None
+        self.is_unfolded: bool | None = None
+        self.is_pinned: bool | None = None
+        self.updated_at: str | None = None
+        self.finished_at: str | None = None
+        self.status: str | None = None
+        self.messages: list[int] | None = None
+
+        self.text: str | None = None
+        self.markdown: str | None = None
+
+
+class HiperIssues(JsonExt, DictToObject):
+    """Hiper issues."""
+
+    def __init__(self, tmp_json: str | None = None) -> None:
+        """Init."""
+        self.globals: list[IssueItem] = []
+        self.regionals: list[IssueItem] = []
+        self.finisheds: list[IssueItem] = []
+        super().__init__()
+
+        if tmp_json is None:
+            return
+
+        self.reload(tmp_json)
+
+    def reload(self, tmp_json: str) -> None:
+        """Reload."""
+        self.dict_to_object(
+            self.json_str_to_dict(
+                tmp_json,
+                {
+                    "global": "globals",
+                    "regional": "regionals",
+                    "finished": "finisheds",
+                },
+            )
+        )
+
+
+# ------------------------------------------------------------------
+# ------------------------------------------------------------------
 class ComponentApi:
     """Hiper interface."""
+
+    ISSUES_URL: str = "https://drift-api.hiper.dk/issues"
 
     def __init__(
         self,
@@ -50,20 +106,19 @@ class ComponentApi:
         self.entry: ConfigEntry = entry
         self.session: ClientSession | None = session
 
-        self.region: str = entry.options[CONF_REGION]
-        self.general_msg: bool = entry.options[CONF_GENERAL_MSG]
-        self.city_check: bool = entry.options[CONF_CITY_CHECK]
-        self.city: str = entry.options[CONF_CITY]
-        self.street_check: bool = entry.options[CONF_STREET_CHECK]
-        self.street: str = entry.options[CONF_STREET]
+        self.issues: HiperIssues = HiperIssues()
+        self.issue_general: IssueItem | None = None
+        self.issue_regional: IssueItem | None = None
 
-        self.request_timeout: int = 10
+        self.region: str = entry.options[CONF_REGION]
+
+        self.updated_at_regional: str = entry.options.get(CONF_UPDATED_AT_REGIONAL, "")
+        self.read_regional: bool = entry.options.get(CONF_READ_REGIONAL, False)
+        self.updated_at_global: str = entry.options.get(CONF_UPDATED_AT_GLOBAL, "")
+        self.read_global: bool = entry.options.get(CONF_READ_GLOBAL, False)
+
+        self.request_timeout: int = 5
         self.close_session: bool = False
-        self.is_on: bool = self.entry.options.get(CONF_IS_ON, False)
-        self.msg: str = self.entry.options.get(CONF_MSG, "")
-        self.content: str = self.entry.options.get(CONF_CONTENT, "")
-        self.last_updated: datetime = None
-        self.supress_update_listener: bool = False
 
         self.coordinator.update_interval = timedelta(minutes=15)
         self.coordinator.update_method = self.async_update
@@ -72,19 +127,62 @@ class ComponentApi:
         hass.services.async_register(DOMAIN, "update", self.async_update_service)
         hass.services.async_register(DOMAIN, "reset", self.async_reset_service)
 
+        self.regex_comp: Pattern | None = self.compile_all_words_regex(
+            entry.options.get(CONF_MATCH_LIST),
+            entry.options.get(CONF_MATCH_WORD, False),
+            entry.options.get(CONF_MATCH_CASE, False),
+        )
+
+    # ------------------------------------------------------------------
+    def compile_all_words_regex(
+        self,
+        words: list[str],
+        use_word_boundaries: bool = True,
+        case_sensitive: bool = False,
+    ) -> Pattern[str] | None:
+        r"""Return a compiled regex pattern that matches if ALL words in the list are present in a text.
+
+        - words: A list of words to match.
+        - use_word_boundaries: If True, only matches whole words.
+        - case_sensitive: If False, matches regardless of letter case.
+        regex : ^(?=.*\btest\b)(?=.*\bregex\b)(?=.*\bstrenge\b).*
+
+        """
+
+        if len(words) == 0:
+            return None
+
+        lookaheads: list[str] = []
+
+        for word in words:
+            if word.strip() != "":
+                if use_word_boundaries:
+                    pattern = rf"(?=.*\b{escape(word)}\b)"
+                else:
+                    pattern = rf"(?=.*{escape(word)})"
+                lookaheads.append(pattern)
+        combined_pattern: str = "^" + "".join(lookaheads) + ".*"
+        flags: int = 0 if case_sensitive else IGNORECASE
+        return compile(combined_pattern, flags)
+
     # ------------------------------------------------------------------
     async def async_reset_service(self, call: ServiceCall) -> None:
         """Hiper service interface."""
-        self.is_on = False
-        await self.update_config()
+        self.read_global = True
+        self.read_regional = True
+
+        await self.async_update_config()
         await self.coordinator.async_request_refresh()
 
     # ------------------------------------------------------------------
     async def async_update_service(self, call: ServiceCall) -> None:
         """Hiper service interface."""
-        self.msg = ""
-        self.content = ""
-        await self.update_config()
+        self.updated_at_global = ""
+        self.read_global = False
+        self.updated_at_regional = ""
+        self.read_regional = False
+
+        await self.async_update_config()
 
         await self.async_update()
         await self.coordinator.async_request_refresh()
@@ -103,126 +201,113 @@ class ComponentApi:
             await self.session.close()
 
     # ------------------------------------------------------
+    @handle_retries(retries=5, retry_delay=5)
+    async def _async_get_issues(self) -> str:
+        async with timeout(self.request_timeout):
+            response = await self.session.get(self.ISSUES_URL)
+
+        return await response.text()
+
+    # ------------------------------------------------------
+    async def async_create_issue_text(self, issue: IssueItem) -> str:
+        """Create issue text."""
+
+        return (
+            issue.subject
+            + "\n"
+            + issue.area
+            + "\n"
+            + "Forventet færdig: "
+            + issue.eta
+            + "\n"
+            + "Opdateret: "
+            + issue.updated_at
+            + "\n"
+        )
+
+    # ------------------------------------------------------
+    async def async_create_issue_markdownt(self, issue: IssueItem) -> str:
+        """Create issue markdown."""
+
+        return (
+            issue.subject
+            + "\n"
+            + issue.area
+            + "\n"
+            + "Forventet færdig: "
+            + issue.eta
+            + "\n"
+            + "Opdateret: "
+            + issue.updated_at
+            + "\n"
+        )
+
+    # ------------------------------------------------------
+    async def async_handle_general_issue(self, issue: IssueItem) -> None:
+        """Handle general issue."""
+
+        self.issue_general = issue
+        self.issue_general.text = await self.async_create_issue_text(issue)
+
+        self.issue_general.markdown = await self.async_create_issue_markdownt(issue)
+
+    # ------------------------------------------------------
+    async def async_handle_regional_issue(self, issue: IssueItem) -> None:
+        """Handle regional issue."""
+
+        self.issue_regional = issue
+        self.issue_regional.text = await self.async_create_issue_text(issue)
+
+        self.issue_regional.markdown = await self.async_create_issue_markdownt(issue)
+
+    # ------------------------------------------------------
     async def async_check_hiper(self, region: str) -> None:
         """Check if Hiper drift."""
-        tmp_msg: str = ""
-        tmp_content: str = ""
-        is_updated: bool = False
-        ROOT_DRIFT_URL: str = "https://www.hiper.dk/drift/"
 
-        try:
-            async with timeout(self.request_timeout):
-                response = await self.session.get(ROOT_DRIFT_URL)
+        self.issue_general = None
+        self.issue_regional = None
 
-                soup = await self.hass.async_add_executor_job(
-                    BeautifulSoup, await response.text(), "lxml"
-                )
+        self.issues.reload(await self._async_get_issues())
 
-            if (
-                self.general_msg
-                and soup.find(string=re.compile("generelle driftssager", re.IGNORECASE))
-                is not None
-                and soup.find(
-                    string=re.compile("ingen generelle driftssager", re.IGNORECASE)
-                )
-                is None
+        for item in self.issues.globals:
+            if item.updated_at != self.updated_at_global:
+                self.updated_at_global = item.updated_at
+                self.read_global = False
+                await self.async_update_config()
+
+            if not self.read_global:
+                await self.async_handle_general_issue(item)
+
+            break
+
+        region_num: int = int(region[-1])
+
+        for item in self.issues.regionals:
+            if item.region_id == region_num and (
+                self.regex_comp is None
+                or self.regex_comp.match(item.subject + item.area)
             ):
-                tmp_msg = "Generelle driftsager"
+                if item.updated_at != self.updated_at_regional:
+                    self.updated_at_regional = item.updated_at
+                    self.read_regional = False
+                    await self.async_update_config()
 
-                try:
-                    tag = soup.select(
-                        "body > div.site-wrap > main > div.service-status-wrapper > section > div:nth-child(1) > ul > li > div > div.details"
-                    )[0]
-                except IndexError:
-                    tag = soup.select(
-                        "body > div.site-wrap > main > div.service-status-wrapper > section > div:nth-child(2) > ul > li > div > div.details"
-                    )[0]
+                if not self.read_regional:
+                    await self.async_handle_regional_issue(item)
 
-                tmp_content = tag.text.strip()
-                is_updated = True
-
-            if region == CONF_SJ_BH_REGION:
-                url_region: str = ROOT_DRIFT_URL + "region/sjaelland-og-bornholm"
-            elif region == CONF_FYN_REGION:
-                url_region = ROOT_DRIFT_URL + "region/fyn"
-
-            elif region == CONF_JYL_REGION:
-                url_region = ROOT_DRIFT_URL + "region/jylland"
-
-            else:
-                ROOT_DRIFT_URL = "https://www.fail.xx"
-
-            async with timeout(self.request_timeout):
-                response = await self.session.get(url_region)
-
-                soup = await self.hass.async_add_executor_job(
-                    BeautifulSoup, await response.text(), "lxml"
-                )
-
-            if response.real_url.path.upper().find("/region/".upper()) == -1:
-                if (
-                    self.city_check
-                    and (
-                        xx := soup.find(
-                            string=re.compile(
-                                " " + self.city.strip() + " ", re.IGNORECASE
-                            )
-                        )
-                    )
-                    is not None
-                ):
-                    tmp_msg = "Lok" + f"ale driftssager for {self.city.strip()}"
-                    tmp_content = xx.strip()
-                    is_updated = True
-
-                if (
-                    self.street_check
-                    and soup.find(
-                        string=re.compile(" " + self.city.strip() + " ", re.IGNORECASE)
-                    )
-                    is not None
-                    and (
-                        xx := soup.find(
-                            string=re.compile(" " + self.street.strip(), re.IGNORECASE)
-                        )
-                    )
-                    is not None
-                ):
-                    tmp_msg = (
-                        "Lok"
-                        f"ale driftssager for {self.city.strip()} på {self.street}"
-                    )
-                    tmp_content = xx.strip()
-                    is_updated = True
-
-            if is_updated:
-                if tmp_msg != self.msg or tmp_content != self.content:
-                    self.msg = tmp_msg
-                    self.content = tmp_content
-                    self.is_on = True
-                    self.last_updated = datetime.now(UTC)
-                    await self.update_config()
-            else:
-                if self.is_on:
-                    await self.update_config()
-
-                self.msg = ""
-                self.content = ""
-                self.is_on = False
-                self.last_updated = None
-
-        except TimeoutError:
-            pass
+                break
 
     # ------------------------------------------------------------------
-    async def update_config(self) -> None:
+    @set_supress_config_update_listener()
+    async def async_update_config(self) -> None:
         """Update config."""
 
         tmp_options: dict[str, Any] = self.entry.options.copy()
-        tmp_options[CONF_MSG] = self.msg
-        tmp_options[CONF_CONTENT] = self.content
-        tmp_options[CONF_IS_ON] = self.is_on
-        self.supress_update_listener = True
+
+        tmp_options[CONF_UPDATED_AT_REGIONAL] = self.updated_at_regional
+        tmp_options[CONF_READ_REGIONAL] = self.read_regional
+        tmp_options[CONF_UPDATED_AT_GLOBAL] = self.updated_at_global
+        tmp_options[CONF_READ_GLOBAL] = self.read_global
 
         self.hass.config_entries.async_update_entry(
             self.entry, data=tmp_options, options=tmp_options

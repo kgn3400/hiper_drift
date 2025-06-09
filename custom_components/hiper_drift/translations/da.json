@@ -18,12 +18,10 @@
     "step": {
       "user": {
         "data": {
-          "city_check": "Check driftssager for byen",
-          "city": "By",
-          "general_msg": "Check for generelle driftssager",
           "region": "Region",
-          "street_check": "Chech driftssager for gaden",
-          "street": "Gade"
+          "match_list": "Liste af ord som skal matche i regionale sager",
+          "match_case": "Match store og små bogstaver",
+          "match_word": "Match hele ordet/udtryk"
         }
       }
     }
@@ -41,12 +39,10 @@
     "step": {
       "init": {
         "data": {
-          "city_check": "Check driftssager for byen",
-          "city": "By",
-          "general_msg": "Generelle driftssager",
           "region": "Region",
-          "street_check": "Chech driftssager for gaden",
-          "street": "Gade"
+          "match_list": "Liste af ord som skal matche i regionale sager",
+          "match_case": "Match store og små bogstaver",
+          "match_word": "Match hele ordet/udtryk"
         }
       }
     }
@@ -54,9 +50,9 @@
   "selector": {
     "region": {
       "options": {
-        "sj_bh": "Sjælland og Bonholm",
-        "fyn": "Fyn",
-        "jylland": "Jylland"
+        "sj_bh_1": "Sjælland og Bonholm",
+        "fyn_2": "Fyn",
+        "jylland_3": "Jylland"
       }
     }
   },
