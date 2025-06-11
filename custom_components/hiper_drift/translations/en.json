@@ -83,9 +83,9 @@
       "description": "Update Hiper drift status.",
       "name": "Update"
     },
-    "reset": {
-      "description": "Reset Hiper drift status.",
-      "name": "Reset"
+    "markasread": {
+      "description": "Mark Hiper drift status as read.",
+      "name": "Mark as read"
     }
   }
 }

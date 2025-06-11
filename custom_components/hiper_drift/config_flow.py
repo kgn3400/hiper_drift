@@ -8,6 +8,7 @@ from typing import Any, cast
 import voluptuous as vol
 
 #  from homeassistant import config_entries
+from homeassistant.core import callback
 from homeassistant.helpers.schema_config_entry_flow import (
     SchemaCommonFlowHandler,
     SchemaConfigFlowHandler,
@@ -28,8 +29,12 @@ from .const import (
     CONF_MATCH_CASE,
     CONF_MATCH_LIST,
     CONF_MATCH_WORD,
+    CONF_READ_GLOBAL,
+    CONF_READ_REGIONAL,
     CONF_REGION,
     CONF_SJ_BH_REGION_1,
+    CONF_UPDATED_AT_GLOBAL,
+    CONF_UPDATED_AT_REGIONAL,
     DOMAIN,
     DOMAIN_NAME,
     TRANSLATION_KEY_REGION,
@@ -102,3 +107,16 @@ class ConfigFlowHandler(SchemaConfigFlowHandler, domain=DOMAIN):
         """Return config entry title."""
 
         return cast(str, DOMAIN_NAME)
+
+    # ------------------------------------------------------------------
+    @callback
+    def async_config_flow_finished(self, options: Mapping[str, Any]) -> None:
+        """Take necessary actions after the config flow is finished, if needed.
+
+        The options parameter contains config entry options, which is the union of user
+        input from the config flow steps.
+        """
+        options[CONF_UPDATED_AT_REGIONAL] = ""
+        options[CONF_READ_REGIONAL] = False
+        options[CONF_UPDATED_AT_GLOBAL] = ""
+        options[CONF_READ_GLOBAL] = False

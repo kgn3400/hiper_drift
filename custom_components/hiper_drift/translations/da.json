@@ -84,9 +84,9 @@
       "description": "Opdater Hiper drift status.",
       "name": "Opdater"
     },
-    "reset": {
-      "description": "Nulstil Hiper drift status.",
-      "name": "Nulstil"
+    "markasread": {
+      "description": "Marker Hiper drift status som læst.",
+      "name": "Marker som læst"
     }
   }
 }

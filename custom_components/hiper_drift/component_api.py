@@ -22,6 +22,7 @@ from .const import (
     CONF_UPDATED_AT_GLOBAL,
     CONF_UPDATED_AT_REGIONAL,
     DOMAIN,
+    LOGGER,
 )
 from .hass_util import (
     DictToObject,
@@ -29,6 +30,18 @@ from .hass_util import (
     handle_retries,
     set_supress_config_update_listener,
 )
+
+
+# ------------------------------------------------------------------
+# ------------------------------------------------------------------
+@dataclass
+class MessageItem:
+    """message item."""
+
+    def __init__(self) -> None:
+        """Init."""
+        self.created_at: str | None = None
+        self.message: str | None = None
 
 
 # ------------------------------------------------------------------
@@ -50,7 +63,7 @@ class IssueItem:
         self.updated_at: str | None = None
         self.finished_at: str | None = None
         self.status: str | None = None
-        self.messages: list[int] | None = None
+        self.messages: list[MessageItem] | None = None
 
         self.text: str | None = None
         self.markdown: str | None = None
@@ -73,16 +86,19 @@ class HiperIssues(JsonExt, DictToObject):
 
     def reload(self, tmp_json: str) -> None:
         """Reload."""
-        self.dict_to_object(
-            self.json_str_to_dict(
-                tmp_json,
-                {
-                    "global": "globals",
-                    "regional": "regionals",
-                    "finished": "finisheds",
-                },
+        try:
+            self.dict_to_object(
+                self.json_str_to_dict(
+                    tmp_json,
+                    {
+                        "global": "globals",
+                        "regional": "regionals",
+                        "finished": "finisheds",
+                    },
+                )
             )
-        )
+        except Exception as exp:  # noqa: BLE001
+            LOGGER.error("Error reloading Hiper issues: %s", exp)
 
 
 # ------------------------------------------------------------------
@@ -125,7 +141,9 @@ class ComponentApi:
 
         """Setup the actions for the Hiper integration."""
         hass.services.async_register(DOMAIN, "update", self.async_update_service)
-        hass.services.async_register(DOMAIN, "reset", self.async_reset_service)
+        hass.services.async_register(
+            DOMAIN, "markasread", self.async_mark_as_read_service
+        )
 
         self.regex_comp: Pattern | None = self.compile_all_words_regex(
             entry.options.get(CONF_MATCH_LIST),
@@ -166,7 +184,7 @@ class ComponentApi:
         return compile(combined_pattern, flags)
 
     # ------------------------------------------------------------------
-    async def async_reset_service(self, call: ServiceCall) -> None:
+    async def async_mark_as_read_service(self, call: ServiceCall) -> None:
         """Hiper service interface."""
         self.read_global = True
         self.read_regional = True
