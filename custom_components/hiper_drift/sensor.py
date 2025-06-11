@@ -80,11 +80,11 @@ class HiperIssueSensor(ComponentEntity, SensorEntity):
         if self.issue_type == IssueType.regional:
             if self.component_api.issue_regional is None:
                 return None
-            return self.component_api.issue_regional.text
+            return self.component_api.issue_regional.text[:255]
 
         if self.component_api.issue_general is None:
             return None
-        return self.component_api.issue_general.text
+        return self.component_api.issue_general.text[:255]
 
     # ------------------------------------------------------
     @property

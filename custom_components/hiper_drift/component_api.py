@@ -248,14 +248,15 @@ class ComponentApi:
         """Create issue markdown."""
 
         return (
-            issue.subject
-            + "\n"
+            '<font color=red> <ha-icon icon="mdi:router-network"></ha-icon></font> '
+            f"**{issue.subject}**"
+            "\n\n"
             + issue.area
-            + "\n"
-            + "Forventet færdig: "
+            + "\n\n"
+            + "Forventet færdig : "
             + issue.eta
             + "\n"
-            + "Opdateret: "
+            + "Opdateret : "
             + issue.updated_at
             + "\n"
         )

@@ -1,13 +1,8 @@
 {
   "entity": {
-    "binary_sensor": {
-      "hiper_drift": {
-        "default": "mdi:ip-network"
-      }
-    },
     "sensor": {
       "hiper_drift": {
-        "default": "mdi:message-alert"
+        "default": "mdi:router-network"
       }
     }
   },
@@ -15,7 +10,7 @@
     "update": {
       "service": "mdi:update"
     },
-    "reset": {
+    "markasread": {
       "service": "mdi:close-circle-outline"
     }
   }
