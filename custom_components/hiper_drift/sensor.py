@@ -26,8 +26,8 @@ async def async_setup_entry(
 
     sensors = []
 
-    sensors.append(HiperIssueSensor(hass, entry, IssueType.regional))
-    sensors.append(HiperIssueSensor(hass, entry, IssueType.generel))
+    sensors.append(HiperIssueSensor(hass, entry, IssueType.REGIONAL))
+    sensors.append(HiperIssueSensor(hass, entry, IssueType.GENEREL))
 
     async_add_entities(sensors)
 
@@ -77,7 +77,7 @@ class HiperIssueSensor(ComponentEntity, SensorEntity):
 
         """
 
-        if self.issue_type == IssueType.regional:
+        if self.issue_type == IssueType.REGIONAL:
             if self.component_api.issue_regional is None:
                 return None
             return self.component_api.issue_regional.text[:255]
@@ -96,7 +96,7 @@ class HiperIssueSensor(ComponentEntity, SensorEntity):
 
         """
 
-        if self.issue_type == IssueType.regional:
+        if self.issue_type == IssueType.REGIONAL:
             return object_to_state_attr_dict(self.component_api.issue_regional)
 
         return object_to_state_attr_dict(self.component_api.issue_general)

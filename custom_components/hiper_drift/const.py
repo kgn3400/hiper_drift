@@ -27,5 +27,5 @@ CONF_JYL_REGION_3 = "jylland_3"
 class IssueType(StrEnum):
     """Issue types."""
 
-    generel = "Generel"
-    regional = "Regional"
+    GENEREL = "Generel"
+    REGIONAL = "Regional"

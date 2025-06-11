@@ -23,6 +23,7 @@ from .const import (
     CONF_UPDATED_AT_REGIONAL,
     DOMAIN,
     LOGGER,
+    IssueType,
 )
 from .hass_util import (
     DictToObject,
@@ -227,7 +228,9 @@ class ComponentApi:
         return await response.text()
 
     # ------------------------------------------------------
-    async def async_create_issue_text(self, issue: IssueItem) -> str:
+    async def async_create_issue_text(
+        self, issue: IssueItem, issue_type: IssueType
+    ) -> str:
         """Create issue text."""
 
         return (
@@ -244,18 +247,24 @@ class ComponentApi:
         )
 
     # ------------------------------------------------------
-    async def async_create_issue_markdownt(self, issue: IssueItem) -> str:
+    async def async_create_issue_markdownt(
+        self, issue: IssueItem, issue_type: IssueType
+    ) -> str:
         """Create issue markdown."""
 
         return (
-            '<font color=red> <ha-icon icon="mdi:router-network"></ha-icon></font> '
-            f"**{issue.subject}**"
-            "\n\n"
+            '### <font color=red> <ha-icon icon="mdi:router-network"></ha-icon></font> '
+            + (
+                "  Hiper - Generelle Driftssager"
+                if issue_type == IssueType.GENEREL
+                else "  Hiper - Regionale driftssager"
+            )
+            + "\n"
+            + issue.subject
+            + "\n\n"
             + issue.area
             + "\n\n"
-            + "Forventet færdig : "
-            + issue.eta
-            + "\n"
+            + ("Forventet færdig : " + issue.eta + "\n" if issue.eta else "")
             + "Opdateret : "
             + issue.updated_at
             + "\n"
@@ -266,18 +275,26 @@ class ComponentApi:
         """Handle general issue."""
 
         self.issue_general = issue
-        self.issue_general.text = await self.async_create_issue_text(issue)
+        self.issue_general.text = await self.async_create_issue_text(
+            issue, IssueType.GENEREL
+        )
 
-        self.issue_general.markdown = await self.async_create_issue_markdownt(issue)
+        self.issue_general.markdown = await self.async_create_issue_markdownt(
+            issue, IssueType.GENEREL
+        )
 
     # ------------------------------------------------------
     async def async_handle_regional_issue(self, issue: IssueItem) -> None:
         """Handle regional issue."""
 
         self.issue_regional = issue
-        self.issue_regional.text = await self.async_create_issue_text(issue)
+        self.issue_regional.text = await self.async_create_issue_text(
+            issue, IssueType.REGIONAL
+        )
 
-        self.issue_regional.markdown = await self.async_create_issue_markdownt(issue)
+        self.issue_regional.markdown = await self.async_create_issue_markdownt(
+            issue, IssueType.REGIONAL
+        )
 
     # ------------------------------------------------------
     async def async_check_hiper(self, region: str) -> None:
