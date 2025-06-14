@@ -10,7 +10,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import CommonConfigEntry
-from .component_api import ComponentApi
+from .component_api import ComponentApi, IssueItem
 from .const import TRANSLATION_KEY, IssueType
 from .entity import ComponentEntity
 from .hass_util import object_to_state_attr_dict
@@ -56,6 +56,7 @@ class HiperIssueSensor(ComponentEntity, SensorEntity):
         self._unique_id = str(issue_type)
 
         self.translation_key = TRANSLATION_KEY
+        self.dummy_attr = object_to_state_attr_dict(IssueItem())
 
     # ------------------------------------------------------
     @property
@@ -97,7 +98,12 @@ class HiperIssueSensor(ComponentEntity, SensorEntity):
         """
 
         if self.issue_type == IssueType.REGIONAL:
+            if self.component_api.issue_regional is None:
+                return self.dummy_attr
             return object_to_state_attr_dict(self.component_api.issue_regional)
+
+        if self.component_api.issue_general is None:
+            return self.dummy_attr
 
         return object_to_state_attr_dict(self.component_api.issue_general)
 
@@ -127,7 +133,7 @@ class HiperIssueSensor(ComponentEntity, SensorEntity):
     # ------------------------------------------------------
     async def async_update(self) -> None:
         """Update the entity. Only used by the generic entity update service."""
-        await self.coordinator.async_request_refresh()
+        await self.coordinator.request_refresh()
 
     # ------------------------------------------------------
     async def async_added_to_hass(self) -> None:

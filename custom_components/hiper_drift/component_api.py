@@ -41,8 +41,8 @@ class MessageItem:
 
     def __init__(self) -> None:
         """Init."""
-        self.created_at: str | None = None
-        self.message: str | None = None
+        self.created_at: str | None = ""
+        self.message: str | None = ""
 
 
 # ------------------------------------------------------------------
@@ -53,21 +53,21 @@ class IssueItem:
 
     def __init__(self) -> None:
         """Init."""
-        self.subject: str | None = None
-        self.created_dtm: str | None = None
-        self.area: str | None = None
-        self.eta: str | None = None
-        self.region: str | None = None
-        self.region_id: int | None = None
-        self.is_unfolded: bool | None = None
-        self.is_pinned: bool | None = None
-        self.updated_at: str | None = None
-        self.finished_at: str | None = None
-        self.status: str | None = None
-        self.messages: list[MessageItem] | None = None
+        self.subject: str | None = ""
+        self.created_dtm: str | None = ""
+        self.area: str | None = ""
+        self.eta: str | None = ""
+        self.region: str | None = ""
+        self.region_id: int | None = 0
+        self.is_unfolded: bool | None = False
+        self.is_pinned: bool | None = False
+        self.updated_at: str | None = ""
+        self.finished_at: str | None = ""
+        self.status: str | None = ""
+        self.messages: list[MessageItem] | None = []
 
-        self.text: str | None = None
-        self.markdown: str | None = None
+        self.text: str | None = ""
+        self.markdown: str | None = ""
 
 
 class HiperIssues(JsonExt, DictToObject):
@@ -191,7 +191,7 @@ class ComponentApi:
         self.read_regional = True
 
         await self.async_update_config()
-        await self.coordinator.async_request_refresh()
+        await self.coordinator.request_refresh()
 
     # ------------------------------------------------------------------
     async def async_update_service(self, call: ServiceCall) -> None:
@@ -204,7 +204,7 @@ class ComponentApi:
         await self.async_update_config()
 
         await self.async_update()
-        await self.coordinator.async_request_refresh()
+        await self.coordinator.request_refresh()
 
     # ------------------------------------------------------------------
     async def async_update(self) -> None:
