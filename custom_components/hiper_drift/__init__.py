@@ -52,7 +52,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: CommonConfigEntry) -> bo
         coordinator=coordinator,
     )
 
-    await hass.config_entries.async_forward_entry_setups(entry, [Platform.SENSOR])
+    await hass.config_entries.async_forward_entry_setups(
+        entry, [Platform.BINARY_SENSOR]
+    )
 
     await coordinator.async_config_entry_first_refresh()
 
@@ -62,7 +64,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: CommonConfigEntry) -> bo
 # ------------------------------------------------------------------
 async def async_unload_entry(hass: HomeAssistant, entry: CommonConfigEntry) -> bool:
     """Unload a config entry."""
-    return await hass.config_entries.async_unload_platforms(entry, [Platform.SENSOR])
+    return await hass.config_entries.async_unload_platforms(
+        entry, [Platform.BINARY_SENSOR]
+    )
 
 
 # ------------------------------------------------------------------

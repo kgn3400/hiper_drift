@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-from homeassistant.components.sensor import (  # SensorDeviceClass,; SensorEntityDescription,
-    SensorEntity,
-)
+from homeassistant.components.binary_sensor import BinarySensorEntity
 from homeassistant.const import MATCH_ALL
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -26,15 +24,15 @@ async def async_setup_entry(
 
     sensors = []
 
-    sensors.append(HiperIssueSensor(hass, entry, IssueType.REGIONAL))
-    sensors.append(HiperIssueSensor(hass, entry, IssueType.GENEREL))
+    sensors.append(HiperIssueBinarySensor(hass, entry, IssueType.REGIONAL))
+    sensors.append(HiperIssueBinarySensor(hass, entry, IssueType.GENEREL))
 
     async_add_entities(sensors)
 
 
 # ------------------------------------------------------
 # ------------------------------------------------------
-class HiperIssueSensor(ComponentEntity, SensorEntity):
+class HiperIssueBinarySensor(ComponentEntity, BinarySensorEntity):
     """Sensor class Hiper."""
 
     _unrecorded_attributes = frozenset({MATCH_ALL})
@@ -51,6 +49,12 @@ class HiperIssueSensor(ComponentEntity, SensorEntity):
         self.hass: HomeAssistant = hass
 
         self.component_api: ComponentApi = entry.runtime_data.component_api
+
+        if issue_type == IssueType.REGIONAL:
+            self.component_api.async_write_ha_state_regional = self.async_write_ha_state
+        else:
+            self.component_api.async_write_ha_state_general = self.async_write_ha_state
+
         self.issue_type: IssueType = issue_type
         self._name = str(issue_type)
         self._unique_id = str(issue_type)
@@ -69,23 +73,19 @@ class HiperIssueSensor(ComponentEntity, SensorEntity):
         """
         return self._name
 
+    # ------------------------------------------------------
     @property
-    def native_value(self) -> str | None:
-        """Native value.
-
-        Returns:
-            str | None: Native value
-
-        """
+    def is_on(self) -> bool:
+        """Get the state."""
 
         if self.issue_type == IssueType.REGIONAL:
             if self.component_api.latest_issue_regional is None:
                 return None
-            return self.component_api.latest_issue_regional.text[:255]
+            return self.component_api.is_on_regional
 
         if self.component_api.latest_issue_general is None:
             return None
-        return self.component_api.latest_issue_general.text[:255]
+        return self.component_api.is_on_general
 
     # ------------------------------------------------------
     @property
@@ -98,11 +98,11 @@ class HiperIssueSensor(ComponentEntity, SensorEntity):
         """
 
         if self.issue_type == IssueType.REGIONAL:
-            if self.component_api.latest_issue_regional is None:
+            if not self.component_api.is_on_regional:
                 return self.dummy_attr
             return object_to_state_attr_dict(self.component_api.latest_issue_regional)
 
-        if self.component_api.latest_issue_general is None:
+        if not self.component_api.is_on_general:
             return self.dummy_attr
 
         return object_to_state_attr_dict(self.component_api.latest_issue_general)

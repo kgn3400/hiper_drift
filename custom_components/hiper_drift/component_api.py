@@ -124,8 +124,10 @@ class ComponentApi:
         self.session: ClientSession | None = session
 
         self.issues: HiperIssues = HiperIssues()
-        self.issue_general: IssueItem | None = None
-        self.issue_regional: IssueItem | None = None
+        self.latest_issue_general: IssueItem = IssueItem()
+        self.is_on_general: bool = False
+        self.latest_issue_regional: IssueItem = IssueItem()
+        self.is_on_regional: bool = False
 
         self.region: str = entry.options[CONF_REGION]
 
@@ -139,6 +141,8 @@ class ComponentApi:
 
         self.coordinator.update_interval = timedelta(minutes=15)
         self.coordinator.update_method = self.async_update
+        self.async_write_ha_state_general = None
+        self.async_write_ha_state_regional = None
 
         """Setup the actions for the Hiper integration."""
         hass.services.async_register(DOMAIN, "update", self.async_update_service)
@@ -274,12 +278,12 @@ class ComponentApi:
     async def async_handle_general_issue(self, issue: IssueItem) -> None:
         """Handle general issue."""
 
-        self.issue_general = issue
-        self.issue_general.text = await self.async_create_issue_text(
+        self.latest_issue_general = issue
+        self.latest_issue_general.text = await self.async_create_issue_text(
             issue, IssueType.GENEREL
         )
 
-        self.issue_general.markdown = await self.async_create_issue_markdownt(
+        self.latest_issue_general.markdown = await self.async_create_issue_markdownt(
             issue, IssueType.GENEREL
         )
 
@@ -287,21 +291,18 @@ class ComponentApi:
     async def async_handle_regional_issue(self, issue: IssueItem) -> None:
         """Handle regional issue."""
 
-        self.issue_regional = issue
-        self.issue_regional.text = await self.async_create_issue_text(
+        self.latest_issue_regional = issue
+        self.latest_issue_regional.text = await self.async_create_issue_text(
             issue, IssueType.REGIONAL
         )
 
-        self.issue_regional.markdown = await self.async_create_issue_markdownt(
+        self.latest_issue_regional.markdown = await self.async_create_issue_markdownt(
             issue, IssueType.REGIONAL
         )
 
     # ------------------------------------------------------
     async def async_check_hiper(self, region: str) -> None:
         """Check if Hiper drift."""
-
-        self.issue_general = None
-        self.issue_regional = None
 
         self.issues.reload(await self._async_get_issues())
 
@@ -311,10 +312,18 @@ class ComponentApi:
                 self.read_global = False
                 await self.async_update_config()
 
+                if self.is_on_general:
+                    self.is_on_general = False
+                    self.async_write_ha_state_general()
+
+                self.is_on_general = True
+
             if not self.read_global:
                 await self.async_handle_general_issue(item)
 
             break
+        else:
+            self.is_on_general = False
 
         region_num: int = int(region[-1])
 
@@ -328,10 +337,18 @@ class ComponentApi:
                     self.read_regional = False
                     await self.async_update_config()
 
+                    if self.is_on_regional:
+                        self.is_on_regional = False
+                        self.async_write_ha_state_regional()
+
+                self.is_on_regional = True
+
                 if not self.read_regional:
                     await self.async_handle_regional_issue(item)
 
                 break
+        else:
+            self.is_on_regional = False
 
     # ------------------------------------------------------------------
     @set_supress_config_update_listener()
