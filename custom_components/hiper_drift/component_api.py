@@ -341,7 +341,7 @@ class ComponentApi:
                 if self.is_on_general:
                     self.is_on_general = False
                     self.async_write_ha_state_general()
-                    await asyncio_sleep
+                    await asyncio_sleep(5)
 
                 self.is_on_general = True
 
@@ -365,7 +365,7 @@ class ComponentApi:
                     if self.is_on_regional:
                         self.is_on_regional = False
                         self.async_write_ha_state_regional()
-                        await asyncio_sleep
+                        await asyncio_sleep(5)
 
                 self.is_on_regional = True
 
