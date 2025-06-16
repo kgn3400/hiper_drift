@@ -14,8 +14,10 @@ CONF_MATCH_LIST = "match_list"
 CONF_REGION = "region"
 CONF_UPDATED_AT_REGIONAL = "updated_at_regional"
 CONF_READ_REGIONAL = "read_regional"
+CONF_IS_ON_REGIONAL = False
 CONF_UPDATED_AT_GLOBAL = "updated_at_global"
 CONF_READ_GLOBAL = "read_global"
+CONF_IS_ON_GENERAL = False
 
 TRANSLATION_KEY = DOMAIN
 TRANSLATION_KEY_REGION = "region"

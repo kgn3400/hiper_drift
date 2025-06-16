@@ -1,6 +1,6 @@
 {
   "entity": {
-    "sensor": {
+    "binary_sensor": {
       "hiper_drift": {
         "default": "mdi:router-network"
       }

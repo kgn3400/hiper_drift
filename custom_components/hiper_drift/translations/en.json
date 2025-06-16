@@ -55,29 +55,6 @@
       }
     }
   },
-  "entity": {
-    "sensor": {
-      "hiper_drift": {
-        "state_attributes": {
-          "content": {
-            "name": "Content"
-          },
-          "last_updated": {
-            "name": "Last updated"
-          }
-        }
-      }
-    },
-    "binary_sensor": {
-      "hiper_drift": {
-        "state_attributes": {
-          "message": {
-            "name": "Message"
-          }
-        }
-      }
-    }
-  },
   "services": {
     "update": {
       "description": "Update Hiper drift status.",

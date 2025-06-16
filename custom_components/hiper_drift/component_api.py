@@ -1,8 +1,9 @@
 """Component api for Hiper drift."""
 
-from asyncio import timeout
+from asyncio import sleep as asyncio_sleep, timeout
 from dataclasses import dataclass
 from datetime import timedelta
+from enum import IntEnum
 from re import IGNORECASE, Pattern, compile, escape
 from typing import Any
 
@@ -13,6 +14,8 @@ from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .const import (
+    CONF_IS_ON_GENERAL,
+    CONF_IS_ON_REGIONAL,
     CONF_MATCH_CASE,
     CONF_MATCH_LIST,
     CONF_MATCH_WORD,
@@ -31,6 +34,27 @@ from .hass_util import (
     handle_retries,
     set_supress_config_update_listener,
 )
+
+
+# ------------------------------------------------------------------
+# ------------------------------------------------------------------
+class RegionWebAdresse(IntEnum):
+    """Region web adresse."""
+
+    SJ_BH = 1
+    FYN = 2
+    JYLLAND = 3
+
+    # ------------------------------------------------------------------
+    def url(self):
+        """Return url."""
+
+        urls = {
+            1: "https://drift.hiper.dk/region/sjaelland-og-bornholm/",
+            2: "https://drift.hiper.dk/region/FYN/",
+            3: "https://drift.hiper.dk/region/jylland/",
+        }
+        return urls[self.value]
 
 
 # ------------------------------------------------------------------
@@ -125,11 +149,13 @@ class ComponentApi:
 
         self.issues: HiperIssues = HiperIssues()
         self.latest_issue_general: IssueItem = IssueItem()
-        self.is_on_general: bool = False
+        self.is_on_general: bool = entry.options.get(CONF_IS_ON_GENERAL, False)
         self.latest_issue_regional: IssueItem = IssueItem()
-        self.is_on_regional: bool = False
+        self.is_on_regional: bool = entry.options.get(CONF_IS_ON_REGIONAL, False)
 
         self.region: str = entry.options[CONF_REGION]
+        self.region_num: int = int(self.region[-1])
+        self.region_url: str = RegionWebAdresse(self.region_num).url()
 
         self.updated_at_regional: str = entry.options.get(CONF_UPDATED_AT_REGIONAL, "")
         self.read_regional: bool = entry.options.get(CONF_READ_REGIONAL, False)
@@ -218,7 +244,7 @@ class ComponentApi:
             self.session = ClientSession()
             self.close_session = True
 
-        await self.async_check_hiper(self.region)
+        await self.async_check_hiper()
 
         if self.session and self.close_session:
             await self.session.close()
@@ -259,9 +285,9 @@ class ComponentApi:
         return (
             '### <font color=red> <ha-icon icon="mdi:router-network"></ha-icon></font> '
             + (
-                "  Hiper - Generelle Driftssager"
+                "  Hiper - [Generelle Driftssager](https://drift.hiper.dk)"
                 if issue_type == IssueType.GENEREL
-                else "  Hiper - Regionale driftssager"
+                else f"  Hiper - [Regionale driftssager]({self.region_url})"
             )
             + "\n"
             + issue.subject
@@ -301,7 +327,7 @@ class ComponentApi:
         )
 
     # ------------------------------------------------------
-    async def async_check_hiper(self, region: str) -> None:
+    async def async_check_hiper(self) -> None:
         """Check if Hiper drift."""
 
         self.issues.reload(await self._async_get_issues())
@@ -315,6 +341,7 @@ class ComponentApi:
                 if self.is_on_general:
                     self.is_on_general = False
                     self.async_write_ha_state_general()
+                    await asyncio_sleep
 
                 self.is_on_general = True
 
@@ -325,10 +352,8 @@ class ComponentApi:
         else:
             self.is_on_general = False
 
-        region_num: int = int(region[-1])
-
         for item in self.issues.regionals:
-            if item.region_id == region_num and (
+            if item.region_id == self.region_num and (
                 self.regex_comp is None
                 or self.regex_comp.match(item.subject + item.area)
             ):
@@ -340,6 +365,7 @@ class ComponentApi:
                     if self.is_on_regional:
                         self.is_on_regional = False
                         self.async_write_ha_state_regional()
+                        await asyncio_sleep
 
                 self.is_on_regional = True
 
@@ -361,6 +387,9 @@ class ComponentApi:
         tmp_options[CONF_READ_REGIONAL] = self.read_regional
         tmp_options[CONF_UPDATED_AT_GLOBAL] = self.updated_at_global
         tmp_options[CONF_READ_GLOBAL] = self.read_global
+
+        tmp_options[CONF_IS_ON_REGIONAL] = self.is_on_regional
+        tmp_options[CONF_IS_ON_GENERAL] = self.is_on_general
 
         self.hass.config_entries.async_update_entry(
             self.entry, data=tmp_options, options=tmp_options
