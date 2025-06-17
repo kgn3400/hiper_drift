@@ -1,25 +1,35 @@
-# Hiper drift
-
+<!-- markdownlint-disable MD041 -->
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/kgn3400/hiper_drift)
 ![GitHub all releases](https://img.shields.io/github/downloads/kgn3400/hiper_drift/total)
 ![GitHub last commit](https://img.shields.io/github/last-commit/kgn3400/hiper_drift)
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/kgn3400/hiper_drift)
 [![Validate% with hassfest](https://github.com/kgn3400/hiper_drift/workflows/Validate%20with%20hassfest/badge.svg)](https://github.com/kgn3400/hiper_drift/actions/workflows/hassfest.yaml)
 
-Hiper drift-integrationen giver dig mulighed for at modtage advarsler om den danske internetudbyder Hipers driftsstatus.
+<img align="left" width="80" height="80" src="https://kgn3400.github.io/hiper_drift/assets/icon@2x.png" alt="App icon">
+
+# Hiper drift
+
+<br/>
+
+Hiper drift integrationen giver dig mulighed for at modtage advarsler om den danske internetudbyder Hipers driftsstatus.
 
 ## Installation
 
-For installation instructions until the Hiper drift integrations is part of HACS, [see this guide](https://hacs.xyz/docs/faq/custom_repositories).
-Or click
+For at installere Trafikmeldinger integrationen, søg efter `Hiper drift` i HACS og download.
+Eller klik på
 [![My Home Assistant](https://img.shields.io/badge/Home%20Assistant-%2341BDF5.svg?style=flat&logo=home-assistant&label=Add%20to%20HACS)](https://my.home-assistant.io/redirect/hacs_repository/?owner=kgn3400&repository=hiper_drift&category=integration)
 
-[![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=hiper_drift)
+Tilføj Hiper drift integrationen til Home Assistant.
+[![Åbn Home Assistant og begynd at opsætte en ny integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=hiper_drift)
 
-## Configuration
+## Konfiguration
 
-Configuration is setup via UI in Home assistant. To add one, go to [Settings > Devices & Services](https://my.home-assistant.io/redirect/integrations) and click the add button. Next choose the [Hiper drift](https://my.home-assistant.io/redirect/config_flow_start?domain=hiper_drift) option.
+Konfiguration opsættes via brugergrænsefladen i Home Assistant.
 
-## Actions
+## Aktioner
 
-Available actions: __update__
+Available actions: __Opdater__ og __Marker som læst__
+
+### Support
+
+Hvis du synes godt om denne integration, eller finder den brugbar, må du meget gerne give den en ⭐️ på GitHub 👍 Det vil blive værdsat!
