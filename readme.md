@@ -15,7 +15,7 @@ Hiper drift integrationen giver dig mulighed for at modtage advarsler om den dan
 
 ## Installation
 
-For at installere Trafikmeldinger integrationen, søg efter `Hiper drift` i HACS og download.
+For at installere TrafikmeHiper drift integrationen, søg efter `Hiper drift` i HACS og download.
 Eller klik på
 [![My Home Assistant](https://img.shields.io/badge/Home%20Assistant-%2341BDF5.svg?style=flat&logo=home-assistant&label=Add%20to%20HACS)](https://my.home-assistant.io/redirect/hacs_repository/?owner=kgn3400&repository=hiper_drift&category=integration)
 
@@ -25,6 +25,22 @@ Tilføj Hiper drift integrationen til Home Assistant.
 ## Konfiguration
 
 Konfiguration opsættes via brugergrænsefladen i Home Assistant.
+
+## Sensorer
+
+Der to binary sensorer er tilgængelige:
+
+'binary_sensor.hiper_drift_generel' - Generelle driftsstatus
+
+```Python
+{{ state_attr('binary_sensor.hiper_drift_generel','markdown') }}
+```
+
+'binary_sensor.hiper_drift_regional' - Regionale driftsstatus
+
+```Python
+{{ state_attr('binary_sensor.hiper_drift_regional','markdown') }}
+```
 
 ## Aktioner
 

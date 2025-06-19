@@ -221,7 +221,7 @@ class ComponentApi:
         self.read_regional = True
 
         await self.async_update_config()
-        await self.coordinator.request_refresh()
+        await self.coordinator.async_request_refresh()
 
     # ------------------------------------------------------------------
     async def async_update_service(self, call: ServiceCall) -> None:
@@ -234,7 +234,7 @@ class ComponentApi:
         await self.async_update_config()
 
         await self.async_update()
-        await self.coordinator.request_refresh()
+        await self.coordinator.async_request_refresh()
 
     # ------------------------------------------------------------------
     async def async_update(self) -> None:
