@@ -26,11 +26,18 @@ Tilføj Hiper drift integrationen til Home Assistant.
 
 Konfiguration opsættes via brugergrænsefladen i Home Assistant.
 
+<img src="https://kgn3400.github.io/hiper_drift/assets/config.png" width="400" height="auto" alt="Config">
+<br>
+
+
 ## Sensorer
 
 Der to binary sensorer er tilgængelige:
 
 'binary_sensor.hiper_drift_generel' - Generelle driftsstatus
+
+<img src="https://kgn3400.github.io/hiper_drift/assets/gen_md.png" width="400" height="auto" alt="Markdown">
+<br>
 
 ```Python
 {{ state_attr('binary_sensor.hiper_drift_generel','markdown') }}
