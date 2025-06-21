@@ -29,29 +29,32 @@ Konfiguration opsættes via brugergrænsefladen i Home Assistant.
 <img src="https://kgn3400.github.io/hiper_drift/assets/config.png" width="400" height="auto" alt="Config">
 <br>
 
-
 ## Sensorer
 
-Der to binary sensorer er tilgængelige:
+Der er to binary sensorer er tilgængelige:
 
-'binary_sensor.hiper_drift_generel' - Generelle driftsstatus
+##### Generelle driftsstatus - binary_sensor.hiper_drift_generel
 
-<img src="https://kgn3400.github.io/hiper_drift/assets/gen_md.png" width="400" height="auto" alt="Markdown">
-<br>
 
 ```Python
 {{ state_attr('binary_sensor.hiper_drift_generel','markdown') }}
 ```
 
-'binary_sensor.hiper_drift_regional' - Regionale driftsstatus
+<img src="https://kgn3400.github.io/hiper_drift/assets/gen_md.png" width="400" height="auto" alt="Markdown">
+<br>
+
+##### Regionale driftsstatus - binary_sensor.hiper_drift_regional
 
 ```Python
 {{ state_attr('binary_sensor.hiper_drift_regional','markdown') }}
 ```
 
+<img src="https://kgn3400.github.io/hiper_drift/assets/rel_md.png" width="400" height="auto" alt="Markdown">
+<br>
+
 ## Aktioner
 
-Available actions: __Opdater__ og __Marker som læst__
+Tilgængelige aktioner: __Opdater__ og __Marker som læst__
 
 ### Support
 
