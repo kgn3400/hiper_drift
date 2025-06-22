@@ -32,7 +32,7 @@ Konfiguration opsættes via brugergrænsefladen i Home Assistant.
 ## Sensorer
 
 Der er to binære sensorer er tilgængelige. Hver binær sensor har de rå attributter fra den seneste generelle/regionale driftsstatus.
-Der ud over en `text` attribut `markdown` som indeholder en markdown beskrivelse af driftsstatusen.
+Derudover er der dannet en `text` attribut som indeholder hele drift meddelelsen. Og en `markdown` attribut som indeholder drift meddelelsen i markdown format. Se nedenstående eksempler.
 
 ##### Generelle driftsstatus - binary_sensor.hiper_drift_generel
 
@@ -54,7 +54,10 @@ Der ud over en `text` attribut `markdown` som indeholder en markdown beskrivelse
 
 ## Aktioner
 
-Tilgængelige aktioner: __Opdater__ og __Marker som læst__
+Tilgængelige aktioner:
+
++ __Opdater:__ opdaterer driftsstatuserne.
++ __Marker som læst:__ markerer driftsstatuserne som læst, og sætter de binære sensorer til `off`.
 
 ### Support
 
