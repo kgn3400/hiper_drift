@@ -1,4 +1,4 @@
-<!-- markdownlint-disable MD041 -->
+<!-- markdownlint-disable MD041 MD001 -->
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/kgn3400/hiper_drift)
 ![GitHub all releases](https://img.shields.io/github/downloads/kgn3400/hiper_drift/total)
 ![GitHub last commit](https://img.shields.io/github/last-commit/kgn3400/hiper_drift)
@@ -31,10 +31,10 @@ Konfiguration opsættes via brugergrænsefladen i Home Assistant.
 
 ## Sensorer
 
-Der er to binary sensorer er tilgængelige:
+Der er to binære sensorer er tilgængelige. Hver binær sensor har de rå attributter fra den seneste generelle/regionale driftsstatus.
+Der ud over en `text` attribut `markdown` som indeholder en markdown beskrivelse af driftsstatusen.
 
 ##### Generelle driftsstatus - binary_sensor.hiper_drift_generel
-
 
 ```Python
 {{ state_attr('binary_sensor.hiper_drift_generel','markdown') }}
