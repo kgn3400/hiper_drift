@@ -79,12 +79,18 @@ class HiperIssueBinarySensor(ComponentEntity, BinarySensorEntity):
         """Get the state."""
 
         if self.issue_type == IssueType.REGIONAL:
-            if self.component_api.latest_issue_regional is None:
-                return None
+            if (
+                self.component_api.latest_issue_regional is None
+                or self.component_api.read_regional
+            ):
+                return False
             return self.component_api.is_on_regional
 
-        if self.component_api.latest_issue_general is None:
-            return None
+        if (
+            self.component_api.latest_issue_general is None
+            or self.component_api.read_global
+        ):
+            return False
         return self.component_api.is_on_general
 
     # ------------------------------------------------------
